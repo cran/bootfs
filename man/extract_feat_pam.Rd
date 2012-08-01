@@ -8,15 +8,14 @@ Feature extraction for PAMR bootstrapping results.
 Feature extraction for PAMR bootstrapping results.
 }
 \usage{
-extract_feat_pam(cvp, SUBDIR)
+extract_feat_pam(cvp, SUBDIR=NULL)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{cvp}{
-%%     ~~Describe \code{cvp} here~~
+	Results of PAMR CV.
 }
   \item{SUBDIR}{
-%%     ~~Describe \code{SUBDIR} here~~
+	String describing the output folder.
 }
 }
 \details{

@@ -7,7 +7,7 @@ Perform PAMR bootstrapping.
 Use PAMR algorithm and bootstrapping to derive a robust feature set.
 }
 \usage{
-bsPAMR(logX, groupings, DIR, params = NULL)
+bsPAMR(logX, groupings, DIR=NULL, params = NULL)
 }
 \arguments{
   \item{logX}{

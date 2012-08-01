@@ -8,7 +8,7 @@ Wrapper for GBM bootstrapping
 Wrapper for GBM bootstrapping. Called from \code{\link{doBS}}.
 }
 \usage{
-bsGBM(logX, groupings, DIR, params = NULL)
+bsGBM(logX, groupings, DIR=NULL, params = NULL)
 }
 
 \arguments{

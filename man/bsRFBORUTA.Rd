@@ -7,7 +7,7 @@ Perform RFBORUTA bootstrapping.
 Use RFBORUTA algorithm and bootstrapping to derive a robust feature set.
 }
 \usage{
-bsRFBORUTA(logX, groupings, DIR, params = NULL)
+bsRFBORUTA(logX, groupings, DIR=NULL, params = NULL)
 }
 \arguments{
   \item{logX}{

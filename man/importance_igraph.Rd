@@ -13,23 +13,28 @@ and how often features occur together during the bootstrapping.
 }
 \usage{
 importance_igraph(phi, main = "", 
-        highlight = NULL,	layout="layout.ellipsis",
+        highlight = NULL,layout="layout.ellipsis",
 		pdf=NULL, pointsize=12, tk=FALSE,
-		node.color="grey", node.filter=NULL,
-		vlabel.cex=0.6, vlabel.cex.min=0.5, vlabel.cex.max=4,
-		max_node_cex=8,
-        edge.width=1, filter=10, max_edge_cex=6, ewprop=3)
+		## provide an intuitive way of filtering
+		node.filter=NULL, ## show all nodes by default
+		edge.filter=10, ## only edges with more than 10 occurences
+		node.color="grey", edge.color="#000000AA",
+		vlabel.cex=0.6, vlabel.cex.min=0.5, vlabel.cex.max=4, max_node_cex=8,
+        edge.width=1, max_edge_cex=6, ewprop=3)
+        
+%phi, main = "", 
+%        highlight = NULL,	layout="layout.ellipsis",
+%		pdf=NULL, pointsize=12, tk=FALSE,
+%		node.color="grey", node.filter=NULL,
+%		vlabel.cex=0.6, vlabel.cex.min=0.5, vlabel.cex.max=4,
+%		max_node_cex=8,
+ %       edge.width=1, filter=10, max_edge_cex=6, ewprop=3)
 }
 \arguments{
   \item{phi}{
     An adjacency matrix. Nonzero values indicate connections between the
     features specified in the column and row names.
 }
-%  \item{weights}{
-%    The counts, how often each connection occurred during a bootstrapping
-%    run. On the diagonal, the number of occurrences of each feature
-%    itself is stored.
-%}
   \item{main}{
     Character. The title to be plotted.
 }
@@ -55,8 +60,11 @@ importance_igraph(phi, main = "",
   \item{node.color}{
     Color of the nodes.
 }
+  \item{edge.color}{
+    Color of the edges.
+}
   \item{node.filter}{
-    Only show nodes with frequency less than or equl \code{node.filter}.
+    Only show nodes with frequency greater than or equal \code{node.filter}. Nodes with smaller frequency will be plotted very small.
 }
   \item{vlabel.cex}{
     Expansion factor for node labels.
@@ -70,15 +78,14 @@ importance_igraph(phi, main = "",
     sized node labels. A value of 4 seems to be reasonable.
 }
   \item{max_node_cex}{
-    Maximum node expansion factor. Determines the maximal size of a
-    node.
+    Maximum node size. 
 }
   \item{edge.width}{
     Edge width parameter. Used as basis edge width for the calculation
     of the edge widths when \code{weights} are supplied. Otherwise,
     it determines the edge width for all edges.
 }
-  \item{filter}{
+  \item{edge.filter}{
     Integer. Only show edges with weight larger than \code{filter}.
 }
   \item{max_edge_cex}{

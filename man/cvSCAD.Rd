@@ -35,7 +35,7 @@ cvSCAD(logX, groupings, DIR, params =
 	This function is usually called by \code{\link{doCV}}.
 }
 \value{
-	None. The output is stored as PDF-file and an RData object into directory \code{DIR}. The PDF holds one ROC curve for each classification from \code{groupings}, showing the expected performance of the classification.
+CV result. A list with three elements \code{res, featlist and performance}, holding the crossvalidation data, an extracted features list in each cv-iteration and an overall performance object, holding information on the performance (AUC values and a roc curve object that can be plotted). See \code{\link{resultCV}} for making a summary plot for the CV.
 }
 \references{
 Zhang, Hao Helen and Ahn, Jeongyoun and Lin, Xiaodong and Park, Cheolwoo: Gene selection using support vector machines with non-convex penalty. Bioinformatics (2006) 22 (1): 88-95

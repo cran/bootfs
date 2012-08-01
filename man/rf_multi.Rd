@@ -8,24 +8,37 @@ Wrapper for RF Boruta bootstrapping.
 Wrapper for RF Boruta bootstrapping.
 }
 \usage{
-rf_multi(X, datX, maxRuns = 500, seed = 123, bstr = 100)
+rf_multi(X, datX, maxRuns = 500, seed = 123, bstr = 100,
+		ntree=500, localImp=TRUE, rfimportance="MeanDecreaseGini",
+		fs.method="rf_boruta")
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{X}{
-%%     ~~Describe \code{X} here~~
+	List of grouping factors.
 }
   \item{datX}{
-%%     ~~Describe \code{datX} here~~
+	Data matrix.
 }
   \item{maxRuns}{
-%%     ~~Describe \code{maxRuns} here~~
+	Boruta argument.
 }
   \item{seed}{
-%%     ~~Describe \code{seed} here~~
+	Random seed.
 }
   \item{bstr}{
-%%     ~~Describe \code{bstr} here~~
+	Number of bootstrap iterations.
+}
+  \item{ntree}{
+	Number of trees for randomForest call.
+}
+  \item{localImp}{
+	LocalImportance in randomForest call.
+}
+  \item{rfimportance}{
+	Which measure to use for variable selection in the randomForest call. Either \code{MeanDecreaseGini} or \code{MeanDecreaseAccuracy}.
+}
+  \item{fs.method}{
+	Which method is used, either \code{rf_boruta} for Boruta selection or \code{rf} for default randomForest.
 }
 }
 \details{
@@ -38,7 +51,7 @@ Todo.
 Todo.
 }
 \author{
-Christian Bender (christian.bender@tron-mainz.de)
+Christian Bender
 }
 
 \seealso{

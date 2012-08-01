@@ -26,12 +26,20 @@
 		if(jitter) {
 			logX <- jitter(logX)
 		}
-		
-		SUBDIR <- paste(DIR,fs.method,sep="/")
-		if(!file.exists(SUBDIR))
-			dir.create(SUBDIR)
 
-	  	fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
+		if(!is.null(DIR)) {
+			SUBDIR <- paste(DIR,fs.method,sep="/")
+			if(!file.exists(SUBDIR))
+				dir.create(SUBDIR)
+			fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
+		} else {
+			# nothing will be plotted to a file, so set an indicator value for the
+			# filename that is recognized by the classification function
+			# as signal 'do not write a file'
+			fnames <- rep("-", length(groupings))
+			SUBDIR <- NULL
+		}
+
 		X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 		names(X) <- names(groupings)
 
@@ -44,12 +52,18 @@
 			resGBM <- lapply(X, cv_gbmclass, logX=logX, ncv=ncv, repeats=repeats, seed=seed, params=params)
 		}
 
+		## extract the performance objects
+		performance <- lapply(resGBM, function(x) x$performance)
+		names(performance) <- names(X)
+		
 		#rrr <- rfclass_cv(X[["groupings"]], logX=logX, ncv=ncv, repeats=repeats, seed=seed, maxRuns=maxRuns)
 		#resRF <- list(ttype=rrr)
-	#############
-	## TODO
-		featlist <- sapply(resGBM, function(x) x$selprobes) #extract_features_gbm(resGBM, SUBDIR)
-		save(resGBM, X, logX, fs.method, SUBDIR, featlist, file=paste(SUBDIR, "env.RData", sep="/"))
 
-		list(res=resGBM, featlist=featlist)
+		## get the featurelist
+		featlist <- sapply(resGBM, function(x) x$selprobes) 
+		if(!is.null(SUBDIR)) {
+			save(resGBM, X, logX, fs.method, SUBDIR, featlist, file=paste(SUBDIR, "env.RData", sep="/"))
+		}
+
+		list(res=resGBM, featlist=featlist, performance=performance)
 	}

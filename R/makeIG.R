@@ -23,7 +23,7 @@ makeIG <- function(res_bstr, SUBDIR=NULL, prob=.975) {
 		ord <- order(rownames(adj))
 		adj2 <- adj[ord,ord]
 		filter <- min((max(adj2)-1),round(quantile(adj2, prob=prob))) 
-		importance_igraph(adj2, main=strat, layout="layout.ellipsis", vlabel.cex=3, filter=filter)
+		importance_igraph(adj2, main=strat, layout="layout.ellipsis", vlabel.cex=3, edge.filter=filter, node.filter=filter)
 	}
 	if(!is.null(SUBDIR)) {
 		dev.off()

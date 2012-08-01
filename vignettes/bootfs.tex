@@ -1,7 +1,7 @@
-%\VignetteIndexEntry{Dynamic Deterministic Effects Propagation Networks - exemplary workflow}
+%\VignetteIndexEntry{Bootstrapped Feature Selection - Introduction}
 %\VignetteDepends{}
-%\VignetteKeywords{Pathways}
-%\VignettePackage{ddepn}
+%\VignetteKeywords{feature selection}
+%\VignettePackage{bootfs}
 
 
 \documentclass[11pt,a4paper]{article}
@@ -54,9 +54,9 @@ This document describes the package 'bootfs' for robust feature selection in cla
 \section{Using bootfs}
 \label{sec:quickstart}
 
-This section contains the basic steps for analysis of high-throughput data, consisting of a number of samples to classify (such as patients) and a number of features, such as genes or proteins. Samples originate in two sample groups, for instance healthy versus sick patients. The aim is to find the most important features discriminating the two classes of patients.
+This section contains the basic steps for analysis of high-throughput data, consisting of a number of samples to classify (such as patients) and a number of features, such as genes or proteins. Samples originate in two sample groups, for instance healthy versus sick patients. The aim is to find the most important features discriminating two or more classes within sample populations.
 
-The usage of the package is illustrated for three classification algorithms: \emph{pamr} (Prediction analysis for Microarrays, \cite{Tibshirani2002}, implementation in \emph{pamr}-R-package), \emph{rf\_boruta} (Random forests with the Boruta algorithm for feature selection, \cite{Kursa2010}, implementation in \emph{Boruta}-R-package) and \emph{scad} (Support Vector Machines with Smoothly Clipped Absolute Deviation feature selection, \cite{Zhang2006}, implementation in the \emph{penalizedSVM} R-package \cite{Becker2011}). Also available feature selection methods (through \emph{penalizedSVM} package) are \emph{1norm} for L1-penalisation (LASSO), \emph{scad+L2} for Elastic-SCAD  and \emph{DrHSVM} for Elastic Net. First of all load the package:
+The usage of the package is illustrated for three classification algorithms: \emph{pamr} (Prediction analysis for Microarrays, \cite{Tibshirani2002}, implementation in \emph{pamr}-R-package), \emph{rf\_boruta} (Random forests with the Boruta algorithm for feature selection, \cite{Kursa2010}, implementation in \emph{Boruta}-R-package) and \emph{scad} (Support Vector Machines with Smoothly Clipped Absolute Deviation feature selection, \cite{Zhang2006}, implementation in the \emph{penalizedSVM} R-package \cite{Becker2011}). Also available feature selection methods (through \emph{penalizedSVM} package) are \emph{1norm} for L1-penalisation (LASSO), \emph{scad+L2} for Elastic-SCAD  and \emph{DrHSVM} for Elastic Net. Further, the original random forest implementation (\emph{randomForest}-R-package \cite{Breiman2001}) is available as method \emph{rf}, as well as the gradient boosting machine (\cite{Friedman2001,Friedman2002}) from package \emph{gbm} as method \emph{gbm}. The methods \emph{pamr}, \emph{rf}, \emph{rf\_boruta} and \emph{gbm} also allow multi-class classification. First of all load the package:
 
 %% chunk 1
 \begin{Schunk}
@@ -87,10 +87,22 @@ The first step is to verify, if the feature selection algorithms perform suffici
 > ## run the crossvalidation
 > ## note the number of repeats should be set to 10 or so, 
 > ## it is set to 2 here to have a low running time of this illustration
-> retCV <- doCV(logX, groupings, fs.methods = c("pamr", "scad", "rf_boruta"), 
-+ 	DIR = "cv", seed = 123, ncv = 5, repeats = 2, 
-+ 	jitter=FALSE, maxiter = 100, maxevals = 50, 
-+ 	max_allowed_feat = 50, n.threshold = 50, maxRuns = 30)
+> ## create a parameter object used for the different methods
+> # for crossvalidation
+> paramsCV <- control_params(seed=123,
++  ncv=5, repeats=2, jitter=FALSE,      ## general parameters
++  maxiter=100, maxevals=50,             ## svm parameters
++  max_allowed_feat=500, n.threshold=50, ## pamr parameters
++  maxRuns=300,                          ## RF parameters
++  ntree = 1000,                         ## GBM parameters
++  shrinkage = 0.01, interaction.depth = 3,
++  bag.fraction = 0.75, train.fraction = 0.75, 
++  n.minobsinnode = 3, n.cores = 1, 
++  verbose = TRUE)
+> ## run the crossvalidation
+> ## takes a while
+> methods <- c("pamr", "scad", "rf_boruta")
+> retCV <- doCV(logX, groupings, fs.methods = methods, DIR = NULL, params=paramsCV)
 \end{Sinput}
 \end{Schunk}
 
@@ -125,14 +137,23 @@ If the performance is of sufficient quality, as seen in the ROC curves generated
 
 \begin{Schunk}
 \begin{Sinput}
+> # for bootstrapping
+> paramsBS <- control_params(seed=123,
++  jitter=FALSE, bstr=15,                  ## general parameters
++  maxiter=100, maxevals=50, bounds=NULL,  ## svm parameters
++  max_allowed_feat=500, n.threshold=50,   ## pamr parameters
++  maxRuns=300,                            ## RF parameters
++  ntree = 1000,                           ## GBM parameters
++  shrinkage = 0.01, interaction.depth = 3,
++  bag.fraction = 0.75, train.fraction = 0.75, 
++  n.minobsinnode = 3, n.cores = 1, 
++  verbose = TRUE, saveres=FALSE
++ )
 > ## run the bootstrapping
-> retBS <- doBS(logX, groupings, 
-+ 	fs.methods=c("pamr","scad","rf_boruta"),
-+ 	DIR="bs", 
-+ 	seed=123, bstr=15, saveres=FALSE, jitter=FALSE,
-+ 	maxiter=100, maxevals=50, bounds=NULL,
-+ 	max_allowed_feat=NULL, n.threshold=50,
-+ 	maxRuns=30)
+> ## takes a while
+> methods <- c("pamr", "scad", "rf_boruta")
+> retBS <- doBS(logX, groupings, fs.methods=methods, DIR="bs", params=paramsBS)
+> 
 \end{Sinput}
 \end{Schunk}
 
@@ -142,7 +163,7 @@ Here, 15 bootstrap sample sets are drawn (bstr=15) and feature Selection is done
 \begin{Sinput}
 > ## show an importance ranking for a single 
 > ## classification method
-> bsres <- makeIG(retBS[[1]], SUBDIR=NULL, prob=.9)
+> bsres <- makeIG(retBS[[1]], SUBDIR=NULL, prob=.999)
 \end{Sinput}
 \end{Schunk}
 
@@ -154,7 +175,7 @@ This might be useful to inspect the selected features for each method separately
 > ## and export the adjacency matrix containing the 
 > ## numbers of occuerrences of the features, as well 
 > ## as the top hits.
-> res <- resultBS(retBS, DIR="bs", vlabel.cex = 3, filter = 8, saveres = FALSE)
+> res <- resultBS(retBS, DIR=NULL, vlabel.cex = 3, filter = 5)
 \end{Sinput}
 \end{Schunk}
 
@@ -175,13 +196,14 @@ The graph can be customised more flexibly using the \emph{importance\_igraph} fu
 > ## plot the importance graph directly. Gives more 
 > ## flexibility to adjust the graph
 > 
-> ig <- importance_igraph(res$adj, main = "my test", 
-+         highlight = NULL,	layout="layout.ellipsis",
-+ 		pdf=NULL, pointsize=12, tk=FALSE,
-+ 		node.color="grey", node.filter=NULL,
-+ 		vlabel.cex=2, vlabel.cex.min=0.5, vlabel.cex.max=4,
-+ 		max_node_cex=8,
-+         edge.width=2, filter=8, max_edge_cex=4, ewprop=8 )
+> resx <- res[[1]]
+> ig <- importance_igraph(resx$adj, main = "my test", 
++  highlight = NULL,	layout="layout.ellipsis",
++  pdf=NULL, pointsize=12, tk=FALSE,
++  node.color="grey", node.filter=NULL,
++  vlabel.cex=2, vlabel.cex.min=0.5, vlabel.cex.max=5,
++  max_node_cex=8,
++  edge.width=2, edge.filter=2, max_edge_cex=5, ewprop=3 )       
 \end{Sinput}
 \end{Schunk}
 
@@ -191,7 +213,7 @@ Figure \ref{fig:impgraph2} shows the importance graph generated with the above c
 
 \begin{figure}[htp]
 \centering
-\includegraphics[width=12cm,height=12cm]{impgraph2}
+\includegraphics[width=10cm,height=10cm]{impgraph2}
 \caption{Importance graph generated by call to \emph{importance\_igraph} directly. Note how the edge widths are thicker but decreasing more rapidly as in figure \ref{fig:impgraph1}, achieved by setting \emph{max\_edge\_cex} and \emph{ewprop} appropriately. Besides, the node label sizes are adjusted using \emph{vlabel.cex}.}
 \label{fig:impgraph2}
 \end{figure}
@@ -216,6 +238,112 @@ Figure \ref{fig:impgraph2} shows the importance graph generated with the above c
 
 %\end{scriptsize}
 
+\subsection{Doing multi-class classification}
+
+It is also possible to classify multiple classes at once. To illustrate this, we show an analysis of Fisher's Iris Data set. The goal is to discriminate between three Iris species (\emph{Iris setosa}, \emph{Iris virginica} and \emph{Iris versicolor}), using four features \emph{Sepal length, Sepal width, Petal length and Petal width}. We load the Iris data set and prepare it for bootfs:
+
+\begin{Schunk}
+\begin{Sinput}
+> ## do multiclass classification
+> ## load the data
+> data(iris)
+> groupings <- list(Species=iris$Species)
+> logX <- iris[,1:4]
+> methods <- c("gbm","rf","pamr")
+> paramsCV <- control_params(seed=123,
++  ncv=5, repeats=2, jitter=FALSE,      ## general parameters
++  maxiter=100, maxevals=50,             ## svm parameters
++  max_allowed_feat=500, n.threshold=50, ## pamr parameters
++  maxRuns=300,                          ## RF parameters
++  ntree = 1000,                         ## GBM parameters
++  shrinkage = 0.01, interaction.depth = 3,
++  bag.fraction = 0.75, train.fraction = 0.75, 
++  n.minobsinnode = 3, n.cores = 1, 
++  verbose = TRUE)
+\end{Sinput}
+\end{Schunk}
+
+Here we use the Gradient Boosting Machine, Breiman's Random Forests and PAMR. As usual we perform a crossvalidation of the selected methods, to assess their individual performance:
+
+\begin{Schunk}
+\begin{Sinput}
+> ## crossvalidation
+> retCV <- doCV(logX, groupings, fs.methods = methods, DIR = NULL, params=paramsCV)
+\end{Sinput}
+\end{Schunk}
+
+A summary of the CV results can be obtained using the \emph{resultsCV} function:
+
+% pdf("resultcvmulti.pdf",width=6,height=6, pointsize=16)
+ 
+\begin{Schunk}
+\begin{Sinput}
+> resultCV(retCV)
+\end{Sinput}
+\end{Schunk}
+
+% dev.off()
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=6cm,height=6cm]{resultcvmulti}
+\caption{Multiclass AUCs generated with the \emph{pROC} package. Shown are the distributions of AUCs over all cross-validation repeats and folds.}
+\label{fig:resultcv}
+\end{figure}
+
+Note that ROC curve display is not possible for more than two classes. For assessment of the performance we rely on the area under curve calculation for multiclass problems \cite{Robin2011}, implemented in the \emph{pROC} package. this gives us the AUC for each CV fold and repeat.\\
+
+
+Now, we can proceed to the bootstrapped feature selection:
+
+\begin{Schunk}
+\begin{Sinput}
+> paramsBS <- control_params(seed=123,
++  jitter=FALSE, bstr=15,                  ## general parameters
++  maxiter=100, maxevals=50, bounds=NULL,  ## svm parameters
++  max_allowed_feat=500, n.threshold=50,   ## pamr parameters
++  maxRuns=300,                            ## RF parameters
++  ntree = 1000,                           ## GBM parameters
++  shrinkage = 0.01, interaction.depth = 3,
++  bag.fraction = 0.75, train.fraction = 0.75, 
++  n.minobsinnode = 3, n.cores = 1, 
++  verbose = TRUE, saveres=FALSE
++ )
+> ## bootstrapped feature selection
+> retBS <- doBS(logX, groupings, fs.methods=methods, DIR=NULL, params=paramsBS)
+\end{Sinput}
+\end{Schunk}
+
+The results are generated and the importance graph is plotted:
+
+% pdf("resultbsmulti.pdf",width=12,height=8, pointsize=16)
+
+\begin{Schunk}
+\begin{Sinput}
+> ## make results from all methods used
+> res <- resultBS(retBS, DIR=NULL, vlabel.cex = 3, filter = 1)
+> ## plot the importance graph
+> resx <- res[[1]]
+> ig <- importance_igraph(resx$adj, main = "multiclass test, IRIS data", 
++         highlight = NULL,	layout="layout.ellipsis",
++ 		pdf=NULL, pointsize=12, tk=FALSE,
++ 		node.color="grey", node.filter=NULL,
++ 		vlabel.cex=1.2, vlabel.cex.min=0.5, vlabel.cex.max=4,
++ 		max_node_cex=8,
++         edge.width=1, edge.filter=1, max_edge_cex=2, ewprop=3 )
+\end{Sinput}
+\end{Schunk}
+
+% dev.off()
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=8cm,height=6cm]{resultbsmulti}
+\caption{Result of multiclass bootfs, done on the IRIS data set. All 4 features are left.}
+\label{fig:resultbs}
+\end{figure}
+
+
 \clearpage
 
 \section*{Session Information}
@@ -224,8 +352,8 @@ The version number of R and packages loaded for generating the vignette were:
 
 
 \begin{itemize}\raggedright
-  \item R version 3.0.1 Patched (2013-08-23 r63665), \verb|x86_64-unknown-linux-gnu|
-  \item Locale: \verb|LC_CTYPE=en_US.UTF-8|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=en_US.UTF-8|, \verb|LC_COLLATE=C|, \verb|LC_MONETARY=en_US.UTF-8|, \verb|LC_MESSAGES=en_US.UTF-8|, \verb|LC_PAPER=en_US.UTF-8|, \verb|LC_NAME=C|, \verb|LC_ADDRESS=C|, \verb|LC_TELEPHONE=C|, \verb|LC_MEASUREMENT=en_US.UTF-8|, \verb|LC_IDENTIFICATION=C|
+  \item R version 3.0.1 (2013-05-16), \verb|x86_64-unknown-linux-gnu|
+  \item Locale: \verb|LC_CTYPE=en_US.UTF-8|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=en_US.UTF-8|, \verb|LC_COLLATE=C|, \verb|LC_MONETARY=en_US.UTF-8|, \verb|LC_MESSAGES=en_US.UTF-8|, \verb|LC_PAPER=C|, \verb|LC_NAME=C|, \verb|LC_ADDRESS=C|, \verb|LC_TELEPHONE=C|, \verb|LC_MEASUREMENT=en_US.UTF-8|, \verb|LC_IDENTIFICATION=C|
   \item Base packages: base, datasets, grDevices, graphics, methods,
     stats, utils
   \item Loaded via a namespace (and not attached): tools~3.0.1

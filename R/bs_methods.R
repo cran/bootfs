@@ -13,6 +13,15 @@ bstr_multi <- function(X, datX, bstr, seed=123, fs.method="scad",
 		datX <- datX[-nas,]
 		datY <- datY[-nas]
 	}
+	
+	## format such that binary vector is -1/1
+	if(!all(as.character(sort(levels(factor(datY))))==c("-1","1"))) {
+		datY <- ifelse(as.numeric(factor(datY))==1, -1, 1)
+	}
+	
+	## datY must be numeric
+	datY <- as.numeric(as.character(datY))
+	
 	## somehow this is the only way how these methods are going to work
 	grid.search <- "interval"
 	lambda1.scad <- lambda2.scad <- NULL
@@ -64,7 +73,7 @@ bstr_multi <- function(X, datX, bstr, seed=123, fs.method="scad",
 
 
 ## for random forest (Boruta) bootstrapping
-rf_multi <- function(X, datX, maxRuns=500, seed=123, bstr=100) {
+rf_multi <- function(X, datX, maxRuns=500, seed=123, bstr=100, ntree=500, localImp=TRUE, rfimportance="MeanDecreaseGini", fs.method="rf_boruta") {
 	datY <- X[[1]]
 	nasY <- which(is.na(datY))
 	nasX <- which(apply(datX, 1, function(x) all(is.na(x))))
@@ -90,8 +99,18 @@ rf_multi <- function(X, datX, maxRuns=500, seed=123, bstr=100) {
 		dat_bstr <- list(datX=datX[bind[[rp]],], datY=datY[bind[[rp]]])
 		rownames(dat_bstr$datX) <- paste(rownames(dat_bstr$datX), 1:nrow(dat_bstr$datX), sep=".")
 
-		bres <- Boruta(x=as.data.frame(dat_bstr$datX), y=factor(dat_bstr$datY), doTrace=2, maxRuns=maxRuns)
-		selprobes <- gsub("`","",names(bres$finalDecision[which(bres$finalDecision!="Rejected")]))
+		if(fs.method=="rf_boruta") {
+			bres <- Boruta(x=as.data.frame(dat_bstr$datX), y=factor(dat_bstr$datY), doTrace=2, maxRuns=maxRuns)
+			selprobes <- gsub("`","",names(bres$finalDecision[which(bres$finalDecision!="Rejected")]))
+		} else {
+			#browser()
+			## use a default random forest: minimum necessary selection
+			bres <- randomForest(x=as.data.frame(dat_bstr$datX), y=factor(dat_bstr$datY),  xtest=NULL, ytest=NULL, ntree=ntree, keep.forest=TRUE, proximity=TRUE, localImp=localImp)
+			imp <- importance(bres)
+			ord <- order(imp[,rfimportance], decreasing=TRUE)
+			imp <- imp[ord,]
+			selprobes <- rownames(imp)[which(imp[,rfimportance]>=1)] ## ranked 
+		}
 		rfs[[rp]] <- list(bres=bres, selprobes=selprobes)
 	}
 	rfs

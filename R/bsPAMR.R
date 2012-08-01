@@ -1,7 +1,8 @@
-bsPAMR <- function(logX, groupings, DIR, params=NULL) {
+bsPAMR <- function(logX, groupings, DIR=NULL, params=NULL) {
 	## default parameters if not given
 	if(is.null(params)) {
-		params <- list(seed=123, bstr=100, ncv=5, max_allowed_feat=500, n.threshold=30, saveres=TRUE, jitter=FALSE)
+		#params <- list(seed=123, bstr=100, ncv=5, max_allowed_feat=500, n.threshold=30, saveres=TRUE, jitter=FALSE)
+		params <- control_params()
 	}
 
 	## introduce some minimal noise to make scaling etc. possible
@@ -9,19 +10,26 @@ bsPAMR <- function(logX, groupings, DIR, params=NULL) {
 		logX <- jitter(logX)
 	}
 	
-	fs.method <- "pamr"
+	fs.method <- params$fs.method #"pamr"
 	seed <- params$seed
 	bstr <- params$bstr
 	ncv <- params$ncv
 	max_allowed_feat <- params$max_allowed_feat
 	n.threshold <- params$n.threshold
 	saveres <- params$saveres
-	
-	SUBDIR <- paste(DIR,fs.method,sep="/")
-	if(!file.exists(SUBDIR))
-		dir.create(SUBDIR)
+
+	if(!is.null(DIR)) {
+		SUBDIR <- paste(DIR,fs.method,sep="/")
+		if(!file.exists(SUBDIR))
+			dir.create(SUBDIR)
+		fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
+	} else {
+		SUBDIR <- NULL
+		fnames <- rep("-", length(groupings))
+		saveres <- FALSE
+	}
+
 	# grouping information
-	fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
 	X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 	names(X) <- names(groupings)
 	seedo <- seed # start seed value
@@ -74,9 +82,8 @@ bsPAMR <- function(logX, groupings, DIR, params=NULL) {
     ## set an attribute naming the method used
     attr(pam_bstr, "fs.method") <- "pamr"
 
-	ig <- makeIG(pam_bstr, SUBDIR, prob=0.975)
-
 	if(saveres) {
+		ig <- makeIG(pam_bstr, SUBDIR, prob=0.975)
 		save(pam_bstr, ig, params, file=paste(SUBDIR, "PAM_RData.RData", sep="/"))
 	}
 	invisible(pam_bstr)

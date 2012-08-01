@@ -13,13 +13,17 @@ cvSCAD <- function(logX, groupings, DIR, params=list(seed=123, ncv=5, repeats=10
 	if(jitter) {
 		logX <- jitter(logX)
 	}
-	
-	SUBDIR <- paste(DIR,fs.method,sep="/")
-	if(!file.exists(SUBDIR))
-		dir.create(SUBDIR)
-	
+
+	if(!is.null(DIR)) {
+		SUBDIR <- paste(DIR,fs.method,sep="/")
+		if(!file.exists(SUBDIR))
+			dir.create(SUBDIR)
+		fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
+	} else {
+		SUBDIR <- NULL
+		fnames <- rep("-", length(groupings))
+	}
 	## grouping information
-	fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
 	X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 	names(X) <- names(groupings)
 
@@ -31,9 +35,15 @@ cvSCAD <- function(logX, groupings, DIR, params=list(seed=123, ncv=5, repeats=10
 		resSCAD <- lapply(X, svmclass, logX=logX, ncv=ncv, repeats=repeats, maxiter=maxiter, maxevals=maxevals, fs.method=fs.method, seed=seed)
 	}
 	allpr <- colnames(logX)
-	ffmat <- extract_feature_rankings(resSCAD, allpr, write=TRUE, DIR=SUBDIR)
+	ffmat <- extract_feature_rankings(resSCAD, allpr, write=ifelse(is.null(SUBDIR), FALSE,  TRUE), DIR=SUBDIR)
 
-	save(resSCAD, allpr, ffmat, X, SUBDIR, logX, ncv, repeats, maxiter, maxevals, fs.method, file=paste(SUBDIR, "env.RData", sep="/"))
+	## extract the performance objects
+	performance <- lapply(resSCAD, function(x) x$performance)
+	names(performance) <- names(X)
 
-	list(res=resSCAD, featlist=ffmat)
+	if(!is.null(SUBDIR)) {
+		save(resSCAD, allpr, ffmat, X, SUBDIR, logX, ncv, repeats, maxiter, maxevals, fs.method, file=paste(SUBDIR, "env.RData", sep="/"))
+	}
+
+	list(res=resSCAD, featlist=ffmat, performance=performance)
 }

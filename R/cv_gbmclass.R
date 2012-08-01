@@ -15,6 +15,9 @@ function(X, logX, ncv=5, repeats=10, seed=123, params,
 	
 	Y <- X[[1]]
 	filename <- X[[2]]
+	## should something be plotted?
+	if(filename=="-")
+		filename <- NULL
 	nas <- which(is.na(Y))
 	if(length(nas)>0) {
 		x <- as.data.frame(logX[-nas,])
@@ -113,7 +116,8 @@ function(X, logX, ncv=5, repeats=10, seed=123, params,
 				gbmpred <- predict(gbm1, newdata=tdata, ntrees=best.iter, type="response")
 				Ncl <- ncol(gbmpred)
 				kx <- 0:Ncl * 2
-				argmax <- apply(gbmpred, 1, function(x) which(x==max(x)))
+				## sometimes more than one group is max. then choose the first one
+				argmax <- apply(gbmpred, 1, function(x) which(x==max(x))[1])
 				allmax <- apply(gbmpred, 1, max)
 				pred <- kx[argmax] + allmax
 				 # attach the prediction probability for the classes. Note that these are one probability for each class, i.e. a matrix with n.class columns for each fold/repeat
@@ -142,23 +146,31 @@ function(X, logX, ncv=5, repeats=10, seed=123, params,
 		auc <- roc(as.vector(unlist(fitted)),as.vector(unlist(labels)),measure="tpr",x.measure="fpr",colorize=colorize, avg="none", spread.estimate="none", filter=0)
 		title(main="ROC curves averaged over all CV runs")
 		roc_binterval(fitted, labels)
+		pred <- prediction(unlist(fitted), unlist(labels))
+		roc.curve <- performance(pred, measure = "tpr", x.measure = "fpr")
+		aucs <- unlist(performance(pred, "auc")@y.values)
 	} else {
-		aucs <- vector("numeric", ncol(fitted))	
-		for(ki in 1:ncol(labels)) {
-			grpx <- labels[,ki]
-			predx <- fitted[,ki]
+		aucs <- vector("numeric", length(fitted))	
+		for(ki in 1:length(labels)) {
+			grpx <- labels[[ki]]
+			predx <- fitted[[ki]]
 			aucs[ki] <- multiclass.roc(grpx~predx)$auc
 		}
 		## plot auc distribution
 		boxplot(aucs, ylim=c(0,1), main=c(paste(Ncl, "- class classification"), "multinomial model"))
 		axis(1, at=1, labels="multiclass AUC")
 		legend("bottomright", border="white", fill="white", legend=c("classes:",levels(Y)))
+		roc.curve <- NULL
+		auc <- signif(median(aucs,na.rm=TRUE), digits=3)
 	}
 	if(!is.null(filename)) {
 		dev.off()
 	}
 
-	cvobj <- list(fitted=fitted, labels=labels, fitlist=fitlist, testlist=testlist, features=features, gbmlist=gbmlist)
+	performance <- list(fitted=fitted, labels=labels, aucs=aucs, auc=auc, roc.curve=roc.curve, classes=levels(Y))
+	#TODO: remove double saving of fitted, labels
+	cvobj <- list(fitlist=fitlist, testlist=testlist, features=features, gbmlist=gbmlist)
+	#cvobj <- list(fitted=fitted, labels=labels, fitlist=fitlist, testlist=testlist, features=features, gbmlist=gbmlist)
 ##TODO!!!	## train on all data
 	fit <- fitGBM(x, yp, ntree, shrinkage, interaction.depth, bag.fraction, train.fraction, n.minobsinnode, verbose) 
 	distribution <- fit$distribution
@@ -173,7 +185,7 @@ function(X, logX, ncv=5, repeats=10, seed=123, params,
 	## ERROR ESTIMATE?? CONFUSIONMATRIX??
 	#err <- round(randf$err.rate[randf$ntree, "OOB"] * 100, digits = 2)
 	#err <- sum(rowSums(cbind(yp, as.numeric(as.character(predict(randf, x)))))==0)*100
-	list(model=gbm1, selprobes=selprobes, cvobj=cvobj) #err=err,
+	list(model=gbm1, selprobes=selprobes, cvobj=cvobj, performance=performance) #err=err,
 }
 
 

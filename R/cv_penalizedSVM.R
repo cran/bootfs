@@ -1,6 +1,10 @@
 svmclass <- function(X, logX, ncv, repeats, maxiter=1000, maxevals=500, fs.method="scad", seed=123) {
 		Y <- X[[1]]
 		filename <- X[[2]]
+		## should something be plotted?
+		if(filename=="-")
+			filename <- NULL
+
 		ret <- cv_penalizedSVM(logX, Y, ncv=ncv, repeats=repeats, filename=filename, maxiter=maxiter, maxevals=maxevals, fs.method=fs.method, seed=seed)
 		ret
 	}
@@ -102,23 +106,31 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 		#auc <- roc(fitted,labels,measure="tpr",x.measure="fpr",colorize=colorize, avg="threshold", spread.estimate="stddev", filter=1)
 		#title(main="ROC curves averaged over CV runs, with stddev")
 		roc_binterval(fitted, labels)
-		
+		pred <- prediction(unlist(fitted), unlist(labels))
+		roc.curve <- performance(pred, measure = "tpr", x.measure = "fpr")
+		aucs <- unlist(performance(pred, "auc")@y.values)
+
 		## some diagnostic plots from penalized svm package
 		if(plotscaddiag) {
-			for(i in 1:length(fitlist)) {
-				scad <- fitlist[[i]]
-				# 						 
-				# create  3 plots on one screen: 
-				# 1st plot: distribution of initial points in tuning parameter space
-				# 2nd plot: visited lambda points vs. cv errors
-				# 3rd plot: the same as the 2nd plot, Ytrain.exclude points are excluded. 
-				# The value cv.error = 10^16 stays for the cv error for an empty model ! 
-				.plot.EPSGO.parms (scad$model$fit.info$Xtrain, scad$model$fit.info$Ytrain, bounds=bounds, Ytrain.exclude=10^16, plot.name=NULL )
-			}
+			print("Sorry, plotscaddiag is DEFUNCT and will be removed soon")
+#~ 			for(i in 1:length(fitlist)) {
+#~ 				scad <- fitlist[[i]]
+#~ 				# 						 
+#~ 				# create  3 plots on one screen: 
+#~ 				# 1st plot: distribution of initial points in tuning parameter space
+#~ 				# 2nd plot: visited lambda points vs. cv errors
+#~ 				# 3rd plot: the same as the 2nd plot, Ytrain.exclude points are excluded. 
+#~ 				# The value cv.error = 10^16 stays for the cv error for an empty model ! 
+#~ 				.plot.EPSGO.parms (scad$model$fit.info$Xtrain, scad$model$fit.info$Ytrain, bounds=bounds, Ytrain.exclude=10^16, plot.name=NULL )
+#~ 			}
 		}
+		performance <- list(fitted=fitted, labels=labels, aucs=aucs, auc=auc, roc.curve=roc.curve, classes=levels(Y))
 		
 		if(!is.null(filename)) {
 			dev.off()
 		}
-		invisible(list(filename=filename, sn=sn, sp=sp, fitted=fitted, labels=labels, fitlist=fitlist, testlist=testlist, features=features, auc=auc, repeats=repeats, ncv=ncv))
+		## TODO: remove double saving of fitted, labels
+		retobj <- list(filename=filename, sn=sn, sp=sp, fitlist=fitlist, testlist=testlist, features=features, auc=auc, repeats=repeats, ncv=ncv, performance=performance)
+		#retobj <- list(filename=filename, sn=sn, sp=sp, fitted=fitted, labels=labels, fitlist=fitlist, testlist=testlist, features=features, auc=auc, repeats=repeats, ncv=ncv, performance=performance)
+		invisible(retobj)
 	}

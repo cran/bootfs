@@ -7,8 +7,9 @@ Perform SCAD SVM bootstrapping.
 Use SCAD SVM algorithm and bootstrapping to derive a robust feature set.
 }
 \usage{
-bsSCAD(logX, groupings, DIR, params = list(seed=123, bstr=100, maxiter=1000, maxevals=500,
-			bounds=NULL, saveres=TRUE, jitter=FALSE, fs.method="scad"))
+bsSCAD(logX, groupings, DIR=NULL, params = NULL)
+%list(seed=123, bstr=100, maxiter=1000, maxevals=500,
+%			bounds=NULL, saveres=TRUE, jitter=FALSE, fs.method="scad"))
 }
 \arguments{
   \item{logX}{

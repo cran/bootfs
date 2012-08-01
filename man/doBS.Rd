@@ -12,8 +12,8 @@ final feature set.
 }
 \usage{
 doBS(logX, groupings, 
-	fs.methods=c("pamr","scad","rf_boruta"),
-	DIR="bs", 
+	fs.methods=c("pamr","gbm","rf"),
+	DIR=NULL, 
 	seed=123, bstr=100, saveres=TRUE, jitter=FALSE,
 	maxiter=1000, maxevals=500, bounds=NULL,
 	max_allowed_feat=NULL, n.threshold=50,
@@ -30,7 +30,7 @@ doBS(logX, groupings,
 	1 for group A and -1 for group B). 
 }
   \item{fs.methods}{
-	A character vector naming the algorithms to be used. Currently, the following three algorithms are included: \code{pamr}, \code{scad}, \code{rf_boruta}. Any combination of these three can be used.
+	A character vector naming the algorithms to be used. Currently, the following three algorithms are included: \code{pamr}, \code{scad}, \code{rf_boruta}, \code{rf}, \code{gbm}. Any combination of these three can be used. Note that multiclass classification is only possible with \code{pamr, rf_boruta, rf, gbm}.
 }
   \item{DIR}{
 	The output base directory.
@@ -68,7 +68,7 @@ doBS(logX, groupings,
 	Parameter for Random Forest/Boruta from \code{Boruta} package.
 }
   \item{params}{
-	List. Parameter list for the different methods. If NULL, a default object will be created, including the parameters \code{seed, ncv, repeats, jitter, maxiter, maxevals, max_allowed_feat, n.threshold and maxRuns}, as they are passed to \code{doCV}. Additionally, parameters for the boosting approach are specified. See details for more information.
+	List. Parameter list for the different methods. Can be created using the function \code{\link{control_params}}. If NULL, a default object will be created with this function. See the help for \code{control_params} and the details for more information.
 }
 }
 \details{
@@ -80,9 +80,11 @@ doBS(logX, groupings,
 	\item{general parameters}{seed=123, ncv=5, repeats=10, jitter=FALSE}
 	\item{pamr}{max_allowed_feat=500, n.threshold=50}
 	\item{rf_boruta}{maxRuns=300}
-	\item{svmSCAD}{maxiter=1000, maxevals=500}
+	\item{rf}{ntree=500, rfimportance="MeanDecreaseGini", localImp=TRUE}
+	\item{svmSCAD (and other svm methods)}{maxiter=1000, maxevals=500}
 	\item{gbm}{ntree=1000, shrinkage=0.01,interaction.depth=3,bag.fraction=0.75, train.fraction=0.75, n.minobsinnode=3,n.cores=1,verbose=TRUE}
 	}
+	It is easiest to generate the control parameter list by using \code{\link{control_params}}.
 }
 \value{
 	Output is stored in directory \code{DIR}.
@@ -115,33 +117,23 @@ R-packages: \code{penalizedSVM}, \code{Boruta}, \code{pamr}
 \examples{
 \dontrun{
 
+
 # library(bootfs)
 set.seed(1234)
 data <- simDataSet(nsam=30, ngen=100, sigma=2, plot=TRUE)
 logX <- data$logX
 groupings <- data$groupings
 
-#methods <- c("pamr", "scad", "rf_boruta")
-methods <- c("pamr", "gbm", "rf_boruta")
+## all methods:
+#methods <- c("pamr", "gbm", "rf_boruta", "rf", "scad", "DrHSVM", "1norm", "scad+L2")
 
-## create a parameter object used for the different methods
-# for crossvalidation
-paramsCV <- list(seed=123,
-			ncv=5, repeats=10, jitter=FALSE,      ## general parameters
-			maxiter=100, maxevals=50,             ## scad parameters
-			max_allowed_feat=500, n.threshold=50, ## pamr parameters
-			maxRuns=300,                          ## RF parameters
-			ntree = 1000,                         ## GBM parameters
-			shrinkage = 0.01, interaction.depth = 3,
-			bag.fraction = 0.75, train.fraction = 0.75, 
-			n.minobsinnode = 3, n.cores = 1, 
-			verbose = TRUE
-)
+## selected methods
+methods <- c("pamr", "gbm", "rf")
 
 # for bootstrapping
-paramsBS <- list(seed=1234,
+paramsBS <- control_params(seed=123,
 			jitter=FALSE, bstr=10,                  ## general parameters
-			maxiter=100, maxevals=50, bounds=NULL,  ## scad parameters
+			maxiter=100, maxevals=50, bounds=NULL,  ## svm parameters
 			max_allowed_feat=500, n.threshold=50,   ## pamr parameters
 			maxRuns=300,                            ## RF parameters
 			ntree = 1000,                           ## GBM parameters
@@ -151,13 +143,17 @@ paramsBS <- list(seed=1234,
 			verbose = TRUE, saveres=FALSE
 )
 
-
-
 ## run the crossvalidation
 ## takes a while
 retCV <- doCV(logX, groupings, fs.methods = methods, DIR = "cv", params=paramsCV)
 
-## bootstrapped feature selection
+# old interface
+#retCV <- doCV(logX, groupings, fs.methods = methods, 
+#	DIR = "cv", seed = 123, ncv = 5, repeats = 5, 
+#	jitter=FALSE, maxiter = 100, maxevals = 50, 
+#	max_allowed_feat = 50, n.threshold = 50, maxRuns = 30)
+
+## run the bootstrapping
 ## takes a while
 retBS <- doBS(logX, groupings, fs.methods=methods, DIR="bs", params=paramsBS)
 
@@ -180,7 +176,7 @@ ig <- importance_igraph(res$adj, main = "my test",
 		node.color="grey", node.filter=NULL,
 		vlabel.cex=1.2, vlabel.cex.min=0.5, vlabel.cex.max=4,
 		max_node_cex=8,
-        edge.width=1, filter=1, max_edge_cex=2, ewprop=3 )
+        edge.width=1, edge.filter=1, max_edge_cex=2, ewprop=3 )
 
 
 ## show the data and groups
@@ -222,7 +218,7 @@ ig <- importance_igraph(res$adj, main = "my test",
 		node.color="grey", node.filter=NULL,
 		vlabel.cex=1.2, vlabel.cex.min=0.5, vlabel.cex.max=4,
 		max_node_cex=8,
-        edge.width=1, filter=1, max_edge_cex=2, ewprop=3 )
+        edge.width=1, edge.filter=1, max_edge_cex=2, ewprop=3 )
 
 
 

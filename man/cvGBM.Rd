@@ -31,7 +31,7 @@ cvGBM(logX, groupings, DIR, params = list(seed = 123, ncv = 5,
 	Internal function.
 }
 \value{
-CV result.
+CV result. A list with three elements \code{res, featlist and performance}, holding the crossvalidation data, an extracted features list in each cv-iteration and an overall performance object, holding information on the performance (AUC values and a roc curve object that can be plotted). See \code{\link{resultCV}} for making a summary plot for the CV.
 }
 \references{
 J.H. Friedman (2001). "Greedy Function Approximation: A Gradient Boosting Machine," _Annals of Statistics_ 29(5):1189-1232.

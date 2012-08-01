@@ -13,13 +13,18 @@
 		if(jitter) {
 			logX <- jitter(logX)
 		}
-		
-		SUBDIR <- paste(DIR,fs.method,sep="/")
-		if(!file.exists(SUBDIR))
-			dir.create(SUBDIR)
 
-		#X <- list(groupings=list(groupings, paste(SUBDIR, "groupings.pdf", sep="/")))
-		fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
+		if(!is.null(DIR)) {
+			SUBDIR <- paste(DIR,fs.method,sep="/")
+			if(!file.exists(SUBDIR))
+				dir.create(SUBDIR)
+			#X <- list(groupings=list(groupings, paste(SUBDIR, "groupings.pdf", sep="/")))
+			fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
+		} else {
+			SUBDIR <- NULL
+			fnames <- paste(names(groupings),".pdf",sep="")
+		}
+
 		X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 		names(X) <- names(groupings)
 
@@ -33,11 +38,17 @@
 		## make the feature table
 		featlist <- sapply(resPAM, extract_feat_pam, SUBDIR=SUBDIR)
 
-		save(resPAM, X, logX, ncv, n.threshold, fs.method, SUBDIR, featlist, file=paste(SUBDIR, "env.RData", sep="/"))
-
+		if(!is.null(SUBDIR)) {
+			save(resPAM, X, logX, ncv, n.threshold, fs.method, SUBDIR, featlist, file=paste(SUBDIR, "env.RData", sep="/"))
+		}
+		
 		################################
 		## ROC Curves for PAM
-		pdf(paste(SUBDIR, "PAMR_ROC_Curves.pdf", sep="/")) #, width=10, height=10)
+		if(!is.null(SUBDIR)) {
+			pdf(paste(SUBDIR, "PAMR_ROC_Curves.pdf", sep="/")) #, width=10, height=10)
+		}
+		## save the performance results in here
+		performance <- list()
 		#par(mfrow=c(3,3))
 		for(i in 1:length(X)) {
 			## find the distribution type
@@ -81,13 +92,12 @@
 						yhat.rep <- c(yhat.rep, as.vector(obj$prob[fold, 2, thind]))
 						yreal.rep <- c(yreal.rep,as.numeric(as.character(obj$y))[fold])
 					}
-					
+					## combine the repeats in one single table
+					#yhat <- cbind(yhat, yhat.rep)
+					#yreal <- cbind(yreal, yreal.rep)
+					yhat[[it]] <- yhat.rep
+					yreal[[it]] <- yreal.rep					
 				}
-				## combine the repeats in one single table
-				#yhat <- cbind(yhat, yhat.rep)
-				#yreal <- cbind(yreal, yreal.rep)
-				yhat[[it]] <- yhat.rep
-				yreal[[it]] <- yreal.rep
 			}
 
 			if(distribution=="multinomial") {
@@ -102,6 +112,8 @@
 				boxplot(aucs, ylim=c(0,1), main=c(paste(Ncl, "- class classification"), "multinomial model"))
 				axis(1, at=1, labels="multiclass AUC")
 				legend("bottomright", border="white", fill="white", legend=c("classes:",levels(Y)))
+				roc.curve <- NULL
+				auc <- signif(median(aucs,na.rm=TRUE),digits=3)
 			} else {
 				## make the roc curve
 				pred <- prediction(as.vector(unlist(yhat)), as.vector(unlist(yreal)))
@@ -115,9 +127,13 @@
 				plot(roc.curve, avg="none", spread.estimate="none", sub=paste("AUC:", auc), main=names(X)[i], lwd=2.5)
 				roc_binterval(yhat, yreal)
 			}
-
+			## save the aucs and the roc curve performance object
+			performance[[names(X)[i]]] <- list(fitted=yhat, labels=yreal, aucs=aucs, auc=auc, roc.curve=roc.curve, classes=levels(factor(clvec)))
 		}
-		dev.off()
+		if(!is.null(SUBDIR)) {
+			dev.off()
+		}
 
-		list(res=resPAM, featlist=featlist)
+		
+		list(res=resPAM, featlist=featlist, performance=performance)
 	}
