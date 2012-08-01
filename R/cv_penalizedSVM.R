@@ -1,3 +1,11 @@
+svmclass <- function(X, logX, ncv, repeats, maxiter=1000, maxevals=500, fs.method="scad", seed=123) {
+		Y <- X[[1]]
+		filename <- X[[2]]
+		ret <- cv_penalizedSVM(logX, Y, ncv=ncv, repeats=repeats, filename=filename, maxiter=maxiter, maxevals=maxevals, fs.method=fs.method, seed=seed)
+		ret
+	}
+
+
 cv_penalizedSVM <-
 function(X, Y, ncv=5, repeats=10, filename=NULL,
 					seed=123, avg="none", spread.estimate="none",
@@ -34,7 +42,8 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 		## CV
 		cvby <- ceiling(nrow(X)/ncv)
 		## initialize the result objects
-		sn <- sp <- fitted <- labels <- testdim <- NULL
+		sn <- sp <- testdim <- NULL
+		fitted <- labels <- list()
 		fitlist <- testlist <- features <- list()
 		it <- 0
 		set.seed(seed)
@@ -42,7 +51,13 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 			## find a permutation leaving stratified test/training sets
 			## with regard to the class label distributions
 			#folds <- select_cv_balanced(X, Y, ncv)
-			folds <- select_cv_balanced(Y, ncv)
+			#folds <- select_cv_balanced(Y, ncv)
+			nottwoclasses <- TRUE
+			while(nottwoclasses) {
+				folds <- createFolds(Y, k=ncv, returnTrain=FALSE) ## from caret package
+				nottwoclasses <- any(sapply(folds, function(x, yp) length(unique(yp[x]))<2, yp=Y))
+			}
+
 			for(i in 1:ncv) {
 				it <- it + 1
 				sel <- folds[[i]]
@@ -53,7 +68,7 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 				traing <- Y[seltrain]
 				## run svmscad
 				st <- system.time( 
-                        scad<- my.svm.fs(train, y=traing, fs.method=fs.method, bounds=bounds,
+                        scad<- svm.fs(train, y=traing, fs.method=fs.method, bounds=bounds,
 								lambda1.set=lambda1.scad, lambda2.set=lambda2.scad,
 								cross.outer= 0, grid.search = grid.search,  maxIter = maxiter, 
 								inner.val.method = "cv", cross.inner= 5, maxevals=maxevals,
@@ -62,8 +77,10 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 				scad.test <- predict.penSVM(scad, test, newdata.labels=testg)
 				sn <- c(sn, scad.test$sensitivity)
 				sp <- c(sp, scad.test$specificity)
-				fitted <- cbind(fitted, scad.test$fitted)
-				labels <- cbind(labels, testg)
+				#fitted <- cbind(fitted, scad.test$fitted)
+				#labels <- cbind(labels, testg)
+				fitted[[it]] <- scad.test$fitted
+				labels[[it]] <- testg
 				fitlist[[it]] <- scad
 				testlist[[it]] <- scad.test
 				if(is.null(scad$model$fit.info$model.list)) {
@@ -79,10 +96,13 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 		if(!is.null(filename)) {
 			pdf(filename)
 		}
-		roc(as.vector(fitted),as.vector(labels),measure="tpr",x.measure="fpr",colorize=colorize, avg="none", spread.estimate="none", filter=0)
-		title(main="ROC curves averaged over all CV runs")
-		auc <- roc(fitted,labels,measure="tpr",x.measure="fpr",colorize=colorize, avg="threshold", spread.estimate="stddev", filter=0)
-		title(main="ROC curves averaged over CV runs, with stddev")
+		auc <- roc(as.vector(unlist(fitted)),as.vector(unlist(labels)),measure="tpr",x.measure="fpr",colorize=colorize, avg="none", spread.estimate="none", filter=0)
+		title(main="ROC curves averaged over all CV runs")	#roc(as.vector(unlist(fitted)),as.vector(unlist(labels)),measure="tpr",x.measure="fpr",colorize=colorize, avg="none", spread.estimate="none", filter=0)
+		#title(main="ROC curves averaged over all CV runs")
+		#auc <- roc(fitted,labels,measure="tpr",x.measure="fpr",colorize=colorize, avg="threshold", spread.estimate="stddev", filter=1)
+		#title(main="ROC curves averaged over CV runs, with stddev")
+		roc_binterval(fitted, labels)
+		
 		## some diagnostic plots from penalized svm package
 		if(plotscaddiag) {
 			for(i in 1:length(fitlist)) {

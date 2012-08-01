@@ -1,6 +1,6 @@
 \name{roc}
 \alias{roc}
-
+\alias{roc_binterval}
 \title{
 Draw ROC curve.
 }
@@ -10,6 +10,9 @@ Draw a ROC curve and calculate corresponding AUC.
 \usage{
 roc(pr, labels, measure = "tpr", x.measure = "fpr", colorize = TRUE, 
 avg = "none", spread.estimate = "stddev", filter = NULL)
+
+roc_binterval(fitted, labels)
+
 }
 
 \arguments{
@@ -37,9 +40,17 @@ avg = "none", spread.estimate = "stddev", filter = NULL)
   \item{filter}{
 	Cutoff, when to plot the roc.
 }
+  \item{fitted}{
+	List. Each element holds the prediction vector for one repeat, fold, etc.
+}
+  \item{labels}{
+	List. Each element holds the true class vector for one repeat, fold, etc.
+}
 }
 \details{
-Plotting of ROC curves using the \code{ROCR} package.
+\code{roc}: Plotting of ROC curves using the \code{ROCR} package.\cr
+\code{roc.binterval}: Add a Monte Carlo interval for the roc curve, using bootstrap samples out of the prediction/label vectors. Note that \code{roc} has to be called before.
+
 }
 \value{
 The AUC value.

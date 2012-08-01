@@ -1,0 +1,240 @@
+%\VignetteIndexEntry{Dynamic Deterministic Effects Propagation Networks - exemplary workflow}
+%\VignetteDepends{}
+%\VignetteKeywords{Pathways}
+%\VignettePackage{ddepn}
+
+
+\documentclass[11pt,a4paper]{article}
+
+%\usepackage[round]{natbib}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\newcommand{\gene}[1]{\emph{#1}}
+
+\setlength{\parskip}{1.5ex}
+\setlength{\parindent}{0cm}
+
+% NEW COMMANDS
+% ------------------------------------------------
+\newcommand{\Robject}[1]{\texttt{#1}}
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rclass}[1]{\textit{#1}}
+\newcommand{\Rfunction}[1]{{\small\texttt{#1}}}
+
+\newcommand{\myincfig}[4]{
+  \setkeys{Gin}{width=#1\textwidth}
+  \begin{figure}[htbp]
+    \begin{center}
+      #2
+      \caption{\label{#3}#4}
+    \end{center}
+  \end{figure}
+  \setkeys{Gin}{width=.8\textwidth}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{Sweave}
+\begin{document}
+
+
+\title{bootfs - Bootstrapped feature selection}
+\author{ Christian Bender \footnote{Translational Oncology (TRON) Mainz, Germany. eMail: christian.bender@tron-mainz.de} }
+\date{\today}
+\maketitle
+
+
+%\begin{abstract}
+%\end{abstract}
+
+This document describes the package 'bootfs' for robust feature selection in classification problems from high-throughput data, such as genomic or proteomic screening data. Several methods for classification are combined, in order to derive a robust estimation of the importance of each feature used for classification.
+
+\section{Using bootfs}
+\label{sec:quickstart}
+
+This section contains the basic steps for analysis of high-throughput data, consisting of a number of samples to classify (such as patients) and a number of features, such as genes or proteins. Samples originate in two sample groups, for instance healthy versus sick patients. The aim is to find the most important features discriminating the two classes of patients.
+
+The usage of the package is illustrated for three classification algorithms: \emph{pamr} (Prediction analysis for Microarrays, \cite{Tibshirani2002}, implementation in \emph{pamr}-R-package), \emph{rf\_boruta} (Random forests with the Boruta algorithm for feature selection, \cite{Kursa2010}, implementation in \emph{Boruta}-R-package) and \emph{scad} (Support Vector Machines with Smoothly Clipped Absolute Deviation feature selection, \cite{Zhang2006}, implementation in the \emph{penalizedSVM} R-package \cite{Becker2011}). Also available feature selection methods (through \emph{penalizedSVM} package) are \emph{1norm} for L1-penalisation (LASSO), \emph{scad+L2} for Elastic-SCAD  and \emph{DrHSVM} for Elastic Net. First of all load the package:
+
+%% chunk 1
+\begin{Schunk}
+\begin{Sinput}
+> library(bootfs)
+\end{Sinput}
+\end{Schunk}
+
+
+\subsection{Simulating data}
+Data can be simulated using a built in function \emph{simDataSet}. This samples a data matrix with \emph{nsam} samples and \emph{ngen} genes, as well as a grouping vector defining two sample groups.
+
+\begin{Schunk}
+\begin{Sinput}
+> set.seed(1234)
+> data <- simDataSet(nsam=30, ngen=100, sigma=1.5, plot=TRUE)
+> logX <- data$logX
+> groupings <- data$groupings
+\end{Sinput}
+\end{Schunk}
+
+\subsection{Assessing performance of the classifiers}
+
+The first step is to verify, if the feature selection algorithms perform sufficienctly on the given data set. For this, a crossvalidation of different classification algorithms is run:
+
+\begin{Schunk}
+\begin{Sinput}
+> ## run the crossvalidation
+> ## note the number of repeats should be set to 10 or so, 
+> ## it is set to 2 here to have a low running time of this illustration
+> retCV <- doCV(logX, groupings, fs.methods = c("pamr", "scad", "rf_boruta"), 
++ 	DIR = "cv", seed = 123, ncv = 5, repeats = 2, 
++ 	jitter=FALSE, maxiter = 100, maxevals = 50, 
++ 	max_allowed_feat = 50, n.threshold = 50, maxRuns = 30)
+\end{Sinput}
+\end{Schunk}
+
+The above command uses the classification methods PAMR, SCAD-SVM and RF-Boruta and performs a 5-fold (ncv=5) crossvalidation on the training data, repeating the crossvalidation 2 times with different training/test set assignments. Classification methods and k-fold for the CV can be easily exchanged by setting the appropriate parameters. The results of the crossvalidation are summarised as ROC (Receiver operator characteristic) curves together with the corresponding AUC (area under the curve), shown in figures \ref{fig:rocpam}, \ref{fig:rocrf} and \ref{fig:rocscad}.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=8cm,height=8cm]{rocpam}
+\caption{Receiver Operator Characteristic (ROC) curve for the PAM algorithm cross-validation. Input data were the simulated data matrix and grouping vectore for 30 samples and 100 features.}
+\label{fig:rocpam}
+\end{figure}
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=8cm,height=8cm]{rocrf}
+\caption{Receiver Operator Characteristic (ROC) curve for the random forest RF-Boruta algorithm cross-validation. Input data were the simulated data matrix and grouping vectore for 30 samples and 100 features.}
+\label{fig:rocrf}
+\end{figure}
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=8cm,height=8cm]{rocscad}
+\caption{Receiver Operator Characteristic (ROC) curve for the SCAD-SVM algorithm cross-validation. Input data were the simulated data matrix and grouping vectore for 30 samples and 100 features.}
+\label{fig:rocscad}
+\end{figure}
+
+
+
+\subsection{Do the feature selection and importance ranking}
+
+If the performance is of sufficient quality, as seen in the ROC curves generated during the cross-validation, the bootstrapping approach for deriving the most important features for this classification task can be done. Again, we select the three algorithms from above and perform bootstrapping on the input data. For each bootstrapping data set the feature selections are done using each algorithm. 
+
+\begin{Schunk}
+\begin{Sinput}
+> ## run the bootstrapping
+> retBS <- doBS(logX, groupings, 
++ 	fs.methods=c("pamr","scad","rf_boruta"),
++ 	DIR="bs", 
++ 	seed=123, bstr=15, saveres=FALSE, jitter=FALSE,
++ 	maxiter=100, maxevals=50, bounds=NULL,
++ 	max_allowed_feat=NULL, n.threshold=50,
++ 	maxRuns=30)
+\end{Sinput}
+\end{Schunk}
+
+Here, 15 bootstrap sample sets are drawn (bstr=15) and feature Selection is done for each sample set. The group proportions are kept constant during the sample selection. Now, for each method, a separate importance graph can be generated:
+
+\begin{Schunk}
+\begin{Sinput}
+> ## show an importance ranking for a single 
+> ## classification method
+> bsres <- makeIG(retBS[[1]], SUBDIR=NULL, prob=.9)
+\end{Sinput}
+\end{Schunk}
+
+This might be useful to inspect the selected features for each method separately. The parameter \emph{prob=.9} is used to define the cutoff value, how often a feature at least must co-occur with another feature, in which case an edge is drawn between them. However, the general ranking of the importance of the features is done by generating the combined importance graph from all selected methods:
+
+\begin{Schunk}
+\begin{Sinput}
+> ## create the combined importance graph for all methods
+> ## and export the adjacency matrix containing the 
+> ## numbers of occuerrences of the features, as well 
+> ## as the top hits.
+> res <- resultBS(retBS, DIR="bs", vlabel.cex = 3, filter = 8, saveres = FALSE)
+\end{Sinput}
+\end{Schunk}
+
+There are several arguments which customise the look of the importance graph. In this call, the \emph{vlabel.cex} argument defines the magnification factor of the node labels (each node corresponds to one feature). The argument \emph{filter} can be used to specify, how often a feature must co-occur with another, such that an edge is drawn between the two features. Figure \ref{fig:impgraph1} shows the result of the above call.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=12cm,height=12cm]{impgraph1}
+\caption{Importance graph generated by \emph{resultBS}. Node width is proportional to the absolute frequency of occurrence of a feature across all bootstrap feature selections. Edge width is proportional to the frequency of co-occurrence of the two adjacent nodes.}
+\label{fig:impgraph1}
+\end{figure}
+
+The graph can be customised more flexibly using the \emph{importance\_igraph} function directly:
+
+%  pdf("impgraph2.pdf", width=10, height=10)
+\begin{Schunk}
+\begin{Sinput}
+> ## plot the importance graph directly. Gives more 
+> ## flexibility to adjust the graph
+> 
+> ig <- importance_igraph(res$adj, main = "my test", 
++         highlight = NULL,	layout="layout.ellipsis",
++ 		pdf=NULL, pointsize=12, tk=FALSE,
++ 		node.color="grey", node.filter=NULL,
++ 		vlabel.cex=2, vlabel.cex.min=0.5, vlabel.cex.max=4,
++ 		max_node_cex=8,
++         edge.width=2, filter=8, max_edge_cex=4, ewprop=8 )
+\end{Sinput}
+\end{Schunk}
+
+% dev.off()
+
+Figure \ref{fig:impgraph2} shows the importance graph generated with the above call. Arguments \emph{vlabel.cex}, \emph{vlabel.cex.min} and \emph{vlabel.cex.max} can be used to adjust the overall, minimum and maximum expansion factor for the node labels. \emph{max\_node\_cex} controls the maximum expansion factor of the node size. The size of the nodes is always proportional to the absolute occurrence of the feature in the \emph{bstr} bootstrapping sample sets. \emph{edge.width} and \emph{max\_edge\_cex} are used for setting the edge width and expansion factor for the edges, respectively, while \emph{ewprop} is a proportionality factor controlling the decrease of edge width with decreasing frequency. A higher value of \emph{ewprop} means a fast reduction of edge width and thus a less densly packed importance graph plot. Also consider the help pages for the respective functions, to learn about the remaining function arguments.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=12cm,height=12cm]{impgraph2}
+\caption{Importance graph generated by call to \emph{importance\_igraph} directly. Note how the edge widths are thicker but decreasing more rapidly as in figure \ref{fig:impgraph1}, achieved by setting \emph{max\_edge\_cex} and \emph{ewprop} appropriately. Besides, the node label sizes are adjusted using \emph{vlabel.cex}.}
+\label{fig:impgraph2}
+\end{figure}
+
+
+%\begin{scriptsize}
+%\begin{table}[h]
+%\begin{tiny}
+%\label{tab:exampledatamatrix}
+%\begin{tabular}{l|cccccccc}
+%	& EGF\_1& EGF\_1 & EGF\_2 & EGF\_2 & EGF\&X\_1 & EGF\&X\_1 & %EGF\&X\_2 & EGF\&X\_2\\
+%	\hline
+%	EGF & 0 &  0 &  0  & 0 &  0 &  0  & 0 &  0 \\
+%	X   & 0 &  0 &  0  & 0  & 0 & 0 &  0  & 0 \\
+%	AKT & 1.45 & 1.8 &  0.99 & 1.6 & 1.78 & 1.8  & 1.56 & 1.58 \\
+%	ERK & 1.33 & 1.7 &  1.57 & 1.3  & 0.68 & 0.34 & 0.62 & 0.47 \\
+%	MEK & 0.45 & 0.8 &  0.99 & 0.6  & 0.78 & 0.8  & 0.56 & 0.58
+%\end{tabular}
+%\caption{Example data matrix for 3 nodes and 2 stimuli.}
+%\end{tiny}
+%\end{table}
+
+%\end{scriptsize}
+
+\clearpage
+
+\section*{Session Information}
+
+The version number of R and packages loaded for generating the vignette were:
+
+
+\begin{itemize}\raggedright
+  \item R version 3.0.1 Patched (2013-08-23 r63665), \verb|x86_64-unknown-linux-gnu|
+  \item Locale: \verb|LC_CTYPE=en_US.UTF-8|, \verb|LC_NUMERIC=C|, \verb|LC_TIME=en_US.UTF-8|, \verb|LC_COLLATE=C|, \verb|LC_MONETARY=en_US.UTF-8|, \verb|LC_MESSAGES=en_US.UTF-8|, \verb|LC_PAPER=en_US.UTF-8|, \verb|LC_NAME=C|, \verb|LC_ADDRESS=C|, \verb|LC_TELEPHONE=C|, \verb|LC_MEASUREMENT=en_US.UTF-8|, \verb|LC_IDENTIFICATION=C|
+  \item Base packages: base, datasets, grDevices, graphics, methods,
+    stats, utils
+  \item Loaded via a namespace (and not attached): tools~3.0.1
+\end{itemize}
+\bibliographystyle{plain}  % Style BST file
+\bibliography{references}     % Bibliography file (usually '*.bib' ) 
+\end{document}
+
+%
+%   end of file
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

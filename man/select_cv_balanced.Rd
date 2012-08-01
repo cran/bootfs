@@ -8,7 +8,7 @@ Balanced training/test set selection for crossvalidation.
 Balanced training/test set selection for crossvalidation.
 }
 \usage{
-select_cv_balanced(yp, ncv)
+select_cv_balanced(yp, ncv, verbose=FALSE)
 }
 \arguments{
   \item{yp}{
@@ -16,6 +16,9 @@ select_cv_balanced(yp, ncv)
 }
   \item{ncv}{
     Number of folds.
+}
+  \item{verbose}{
+    Boolean. If TRUE print some informational messages.
 }
 
 }

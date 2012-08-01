@@ -7,23 +7,12 @@ resultBS <- function(results, DIR=".", vlabel.cex=3, filter=10, saveres=TRUE, us
 		stop("Some bootstrapping runs contain errors. Remove from the result object or rerun the bootstrapping.")
 	}
     allsigs <- list() 
-
     ## specify which results to use
     touse <- names(results)[useresults]
-
-    ## geht das irgendwie schoener?
-    if("rf_boruta" %in% touse)
-		allsigs[["rf_boruta"]] <- sapply(results[["rf_boruta"]][[strat]], function(x) x$selprobes, simplify=FALSE)
-	if("pamr" %in% touse)
-		allsigs[["pamr"]] <- sapply(results[["pamr"]][[strat]], function(x) x$selected_names, simplify=FALSE)
-	if("scad" %in% touse)
-		allsigs[["scad"]] <- sapply(results[["scad"]][[strat]], function(x) names(x$model$w), simplify=FALSE)
-	if("scad+L2" %in% touse)
-		allsigs[["scad+L2"]] <- sapply(results[["scad+L2"]][[strat]], function(x) names(x$model$w), simplify=FALSE)
-	if("DrHSVM" %in% touse)
-		allsigs[["DrHSVM"]] <- sapply(results[["DrHSVM"]][[strat]], function(x) names(x$model$w), simplify=FALSE)
-	if("1norm" %in% touse)
-		allsigs[["1norm"]] <- sapply(results[["1norm"]][[strat]], function(x) names(x$model$w), simplify=FALSE)
+	for(tu in touse) {
+		allsigs[[tu]] <- extractsignatures(results[[tu]], strat)
+	}
+	
 
     ## extract feature sets for each bootstrapping run
     ## every run is summarized by the intersection of all methods

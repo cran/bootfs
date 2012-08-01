@@ -7,7 +7,8 @@ Summarise the results of a bootstrapping analysis.
 Get frequencies of features and importance graph by cobining all bootstrapping runs and classification methods.
 }
 \usage{
-resultBS(results, DIR=".", vlabel.cex = 3, filter = 10, saveres = TRUE, useresults=1:length(results))
+resultBS(results, DIR=".", vlabel.cex = 3, filter = 10, saveres = TRUE, 
+		useresults=1:length(results))
 }
 \arguments{
   \item{results}{

@@ -8,7 +8,8 @@ simDataSet - simulation of exemplary dataset
 A very simple interface to simulate a dataset containing ngen genes and nsam samples. Two groups are defined, drawn from normal distributions with different parameters.
 }
 \usage{
-simDataSet(nsam = 30, ngen = 100, mu1a = 1.2, mu1b = -0.5, mu2a = -1.2, mu2b = -1.4, sigma = 1, plot = FALSE)
+simDataSet(nsam = 30, ngen = 100, mu1a = 1.2, mu1b = -0.5, mu2a = -1.2, mu2b = -1.4, 
+			sigma = 1, plot = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -69,9 +70,11 @@ Christian Bender.
 		# 4. add 6 blocks of 5 genes each and only one significant gene 
 		# per block. all genes in the block are correlated with constant
 		# correlation factor corr.factor=0.8 		
-		#train <- sim.data(n = nsam, ng = ngen, nsg = nsig, corr=TRUE, corr.factor=0.8, blocks=TRUE, n.blocks=6, nsg.block=1, ng.block=5, seed=my.seed )
+		#train <- sim.data(n = nsam, ng = ngen, nsg = nsig, corr=TRUE, 
+		#corr.factor=0.8, blocks=TRUE, n.blocks=6, nsg.block=1, ng.block=5, seed=my.seed )
 
-		train <- sim.data(n = nsam, ng = ngen, nsg = nsig, corr=FALSE,  seed=my.seed, p.n.ratio=0.8) 
+		train <- sim.data(n = nsam, ng = ngen, nsg = nsig, corr=FALSE,  
+						seed=my.seed, p.n.ratio=0.8) 
 
 		logX <- t(train$x)
 		groupings <- list(grx=train$y)

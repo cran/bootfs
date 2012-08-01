@@ -1,5 +1,5 @@
-\name{pamclass}
-\alias{pamclass}
+\name{cv_pamclass}
+\alias{cv_pamclass}
 
 \title{
 Wrapper for PAMR classification call.
@@ -8,7 +8,8 @@ Wrapper for PAMR classification call.
 Wrapper for PAMR classification call.
 }
 \usage{
-pamclass(X, logX, nfold = 5, n.threshold = 30, seed = NULL, max_allowed_feat = NULL, repeats = 1)
+cv_pamclass(X, logX, nfold = 5, n.threshold = 30, seed = NULL, max_allowed_feat = NULL, 
+		repeats = 1)
 }
 \arguments{
   \item{X}{

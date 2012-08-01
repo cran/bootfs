@@ -8,7 +8,8 @@ Wrapper for RF Boruta classification crossvalidation.
 Wrapper for RF Boruta classification crossvalidation.
 }
 \usage{
-rfclass_cv(X, logX, ncv = 5, repeats = 10, seed = 123, maxRuns = 500, avg = "none", spread.estimate = "none", colorize = FALSE, minclassN = NULL, ...)
+rfclass_cv(X, logX, ncv = 5, repeats = 10, seed = 123, maxRuns = 500, avg = "none", 
+			spread.estimate = "none", colorize = FALSE, minclassN = NULL, ...)
 }
 \arguments{
   \item{X}{

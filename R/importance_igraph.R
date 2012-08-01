@@ -1,4 +1,4 @@
-## TODO: clean up this function, it is very crowded with garbage.
+## TODO: clean up this function
 
 importance_igraph <- function (phi, main = "", 
         highlight = NULL,	layout="layout.ellipsis",
@@ -23,7 +23,7 @@ importance_igraph <- function (phi, main = "",
     diag(weights) <- dw
 
 	ig <- graph.adjacency(phix)
-	ig.nodes <- as.matrix(print.igraph.vs(V(ig))) # keggid
+	ig.nodes <- as.matrix(print.igraph.vs(V(ig))) 
 	if(tk) {
 		tkplot(ig, vertex.label=V(ig)$name)
 		return(ig)

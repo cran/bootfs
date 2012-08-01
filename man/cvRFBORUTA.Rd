@@ -8,7 +8,9 @@ Crossvalidation for Random Forests with Boruta feature selection.
 Main Wrapper for the Random Forest/Boruta crossvalidation.
 }
 \usage{
-cvRFBORUTA(logX, groupings, DIR, params = list(seed = 123, ncv = 5, repeats = 10, maxRuns = 300))
+cvRFBORUTA(logX, groupings, DIR, params = 
+				list(seed = 123, ncv = 5, repeats = 10, 
+					maxRuns = 300))
 }
 \arguments{
   \item{logX}{

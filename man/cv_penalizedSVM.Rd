@@ -8,7 +8,9 @@ SVM SCAD crossvalidation.
 SVM SCAD crossvalidation.
 }
 \usage{
-cv_penalizedSVM(X, Y, ncv = 5, repeats = 10, filename = NULL, seed = 123, avg = "none", spread.estimate = "none", colorize = FALSE, maxiter = 1000, maxevals = 500, fs.method = "scad", plotscaddiag = FALSE)
+cv_penalizedSVM(X, Y, ncv = 5, repeats = 10, filename = NULL, seed = 123, 
+	avg = "none", spread.estimate = "none", colorize = FALSE, maxiter = 1000, 
+	maxevals = 500, fs.method = "scad", plotscaddiag = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

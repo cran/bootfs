@@ -1,6 +1,7 @@
 ## yp: class labels
 ## ncv: number of folds
-select_cv_balanced <- function(yp, ncv) {
+select_cv_balanced <- function(yp, ncv, verbose=FALSE) {
+	if(length(unique(yp))==2) {
 		clz <- which(yp==-1)
 		clo <- which(yp==1)
 		nz <- floor(length(clz)/ncv)
@@ -21,8 +22,12 @@ select_cv_balanced <- function(yp, ncv) {
 		ivec <- list() #NULL
 		for(lb in 1:(length(indz)-1)) {
 			ivtmp <- c(ivecz[(indz[lb]+1):indz[lb+1]],iveco[(indo[lb]+1):indo[lb+1]])
-			print(ivtmp)
+			if(verbose)
+				print(ivtmp)
 			ivec[[lb]] <- ivtmp #c(ivec, ivtmp)
 		}
-		ivec
+	} else {
+		ivec <- createFolds(yp, k=ncv, returnTrain=FALSE) ## from caret package
 	}
+	ivec
+}

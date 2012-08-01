@@ -6,7 +6,8 @@ extractsignatures <- function(res_bstr, strat) {
         'scad' = allsignatures <- sapply(res_bstr[[strat]], function(x) names(x$model$w), simplify=FALSE),
         'scad+L2' = allsignatures <- sapply(res_bstr[[strat]], function(x) names(x$model$w), simplify=FALSE),
         '1norm' = allsignatures <- sapply(res_bstr[[strat]], function(x) names(x$model$w), simplify=FALSE),
-        'DrHSVM' = allsignatures <- sapply(res_bstr[[strat]], function(x) names(x$model$w), simplify=FALSE)
+        'DrHSVM' = allsignatures <- sapply(res_bstr[[strat]], function(x) names(x$model$w), simplify=FALSE),
+        'gbm' = allsignatures <- sapply(res_bstr[[strat]], function(x) x$selprobes, simplify=FALSE)
     )
     allsignatures
 }

@@ -1,5 +1,5 @@
-\name{pclass}
-\alias{pclass}
+\name{svmclass}
+\alias{svmclass}
 
 \title{
 Wrapper for SVM SCAD classification call.
@@ -8,7 +8,8 @@ Wrapper for SVM SCAD classification call.
 Wrapper for SVM SCAD classification call.
 }
 \usage{
-pclass(X, logX, ncv, repeats, maxiter = 1000, maxevals = 500, fs.method = "scad", seed = 123)
+svmclass(X, logX, ncv, repeats, maxiter = 1000, maxevals = 500, fs.method = "scad", 
+	seed = 123)
 }
 \arguments{
   \item{X}{

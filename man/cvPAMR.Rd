@@ -7,7 +7,9 @@ Main wrapper to call PAMR crossvalidation.
 Main wrapper to call PAMR crossvalidation.
 }
 \usage{
-cvPAMR(logX, groupings, DIR, params = list(seed = 123, ncv = 5, repeats = 10, max_allowed_feat = 500, n.threshold = 50))
+cvPAMR(logX, groupings, DIR, params = 
+	list(seed = 123, ncv = 5, repeats = 10,
+	max_allowed_feat = 500, n.threshold = 50))
 }
 \arguments{
   \item{logX}{

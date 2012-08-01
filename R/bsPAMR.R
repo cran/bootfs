@@ -43,6 +43,8 @@ bsPAMR <- function(logX, groupings, DIR, params=NULL) {
 		pams <- list()
 		seed <- seedo # start with the same seed for each classification
 		## do the bootstrapping
+		bind <- createResample(datY, bstr)
+
 		for(rp in 1:bstr) {
 			#stopifnot(require(pamr))
 			print(rp)
@@ -51,7 +53,10 @@ bsPAMR <- function(logX, groupings, DIR, params=NULL) {
 			#	set.seed(seed)
 			#}
 			## bootstrap data: keep proportions of 1 and -1 in all sets
-			dat_bstr <- select_bootstrap_data(datX, datY) #datX[sample(1:nrow(datX), nrow(datX),]
+			#dat_bstr <- select_bootstrap_data(datX, datY) #datX[sample(1:nrow(datX), nrow(datX),]
+			dat_bstr <- list(datX=datX[bind[[rp]],], datY=datY[bind[[rp]]])
+			rownames(dat_bstr$datX) <- paste(rownames(dat_bstr$datX), 1:nrow(dat_bstr$datX), sep=".")
+
 			ypam <- dat_bstr[["datY"]]
 			xpam <- t(dat_bstr[["datX"]])
 			pamdat <- list(x=xpam, y=ypam)

@@ -8,7 +8,8 @@ SVM SCAD bootstrapping classification and feature selection.
 SVM SCAD bootstrapping classification and feature selection.
 }
 \usage{
-bstr_multi(X, datX, bstr, seed = 123, fs.method = "scad", bounds, maxiter = 1000, maxevals = 500)
+bstr_multi(X, datX, bstr, seed = 123, fs.method = "scad", bounds, 
+	maxiter = 1000, maxevals = 500)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

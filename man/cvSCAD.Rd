@@ -7,7 +7,10 @@ Crossvalidation for SCAD SVM classification and feature selection.
 Main wrapper for call of SCAD SVM classification.
 }
 \usage{
-cvSCAD(logX, groupings, DIR, params = list(seed = 123, ncv = 5, repeats = 10, maxiter = 1000, maxevals = 500, fs.method="scad"))
+cvSCAD(logX, groupings, DIR, params = 
+		list(seed = 123, ncv = 5, 
+			repeats = 10, maxiter = 1000, 
+			maxevals = 500, fs.method="scad"))
 }
 \arguments{
   \item{logX}{

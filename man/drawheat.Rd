@@ -73,6 +73,7 @@ Help of the \code{gplots} package.
 	rownames(thdat) <- paste("g", 1:nrow(thdat), sep="")
 	thdat <- t(thdat)
 	groups <- rep(c("sample1", "sample2"), each=5)
-	drawheat(thdat, groups = groups, log = FALSE, mar = c(12, 10), distfun = dist.eucsq, hclustfun = ward, cexCol = 1, cexRow = 1)	
+	drawheat(thdat, groups = groups, log = FALSE, mar = c(12, 10), distfun = dist.eucsq,
+			hclustfun = ward, cexCol = 1, cexRow = 1)	
 }
 }

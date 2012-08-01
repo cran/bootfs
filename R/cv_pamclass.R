@@ -1,3 +1,25 @@
+cv_pamclass <-
+function(X, logX, nfold=5, n.threshold=30, seed=NULL, max_allowed_feat=NULL, repeats=1) {
+		Y <- X[[1]]
+		filename <- X[[2]]
+		nas <- which(is.na(Y))
+		if(length(nas) > 0) {
+			ypam <- Y[-nas]
+			xpam <- t(logX[-nas,])
+		} else {
+			ypam <- Y
+			xpam <- t(logX)
+		}
+		pamdat <- list(x=xpam, y=ypam, max_allowed_feat=max_allowed_feat)
+		pamret <- list()
+		set.seed(seed)
+		for(ri in 1:repeats) {
+			pamret[[ri]] <- run_pam(pamdat, nfold=nfold, n.threshold=n.threshold, seed=seed)
+		}
+		pamret
+	}
+
+
 run_pam <- function(pamdat, nfold=5, n.threshold=30, seed=NULL) {
 		#stopifnot(require(pamr))
 		#if(is.null(seed))
@@ -8,7 +30,13 @@ run_pam <- function(pamdat, nfold=5, n.threshold=30, seed=NULL) {
 		#pamdat <- pamdat[-3] ## remove the max_allowed_feat stuff
 		histtr <- pamr.train(pamdat, n.threshold=n.threshold)
 		## define the folds variable
-		folds <- select_cv_balanced(pamdat$y, nfold)
+		#folds <- select_cv_balanced(pamdat$y, nfold)
+		nottwoclasses <- TRUE
+		while(nottwoclasses) {
+			folds <- createFolds(pamdat$y, k=nfold, returnTrain=FALSE) ## from caret package
+			nottwoclasses <- any(sapply(folds, function(x, yp) length(unique(yp[x]))<2, yp=pamdat$y))
+		}
+		#folds <- createFolds(pamdat$y, k=nfold, returnTrain=FALSE) ## from caret package
 		histcv <- pamr.cv(histtr, pamdat, folds=folds)
 		#histcv <- pamr.cv(histtr, pamdat, nfold=nfold)
 		ts <- histcv$threshold
@@ -29,3 +57,6 @@ run_pam <- function(pamdat, nfold=5, n.threshold=30, seed=NULL) {
 		selected_names <- rownames(pamdat$x)[selected]
 		list(trained=histtr, cv=histcv, tmin=tmin, minerr=minerr, selected=selected, selected_names=selected_names)
 	}
+
+
+
