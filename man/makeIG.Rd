@@ -1,7 +1,7 @@
 \name{makeIG}
 \alias{makeIG}
 \title{
-Create an importance graph from a bootstrapping result.
+Create an importance graph from a bootstrapping result of a single classification method.
 }
 \description{
 After running \code{\link{bsSCAD}, \link{bsPAMR} or \link{bsRFBORUTA}},
@@ -9,7 +9,7 @@ the final feature ranking is shown as egg-shaped graph using this
 function.
 }
 \usage{
-makeIG(res_bstr, SUBDIR=NULL)
+makeIG(res_bstr, SUBDIR=NULL, prob=.975)
 }
 \arguments{
   \item{res_bstr}{
@@ -18,6 +18,9 @@ makeIG(res_bstr, SUBDIR=NULL)
   \item{SUBDIR}{
 	Where to store the output. If NULL, the importance graph is plotted 
 	to the standard plotting device.
+}
+  \item{prob}{
+	Quantile in [0,1], defines the cutoff, at which frequency of cooccuring features an edge will be drawn between the two features in the importance graph.
 }
 }
 \details{
@@ -48,19 +51,11 @@ Christian Bender (christian.bender@tron-mainz.de)
 }
 \examples{
 \dontrun{
-# library(bootFS)
-nsam <- 30 ## number of samples
-ngen <- 100 ## number of features
-
-## get a noise data matrix
-logX <- matrix(rnorm(nsam*ngen, 0, 10), nrow=nsam, 
-	dimnames=list(paste("s1", 1:nsam,sep="_"), paste("g",1:ngen,sep=""))) 
-groupings <- list(grx=c(rep(-1, nsam/2), rep(1,nsam/2)))
-## now add some information so some of the genes
-igenes <- c(1:10)
-sg <- c(1,nsam/3,2*nsam/3,nsam)
-logX[sg[1]:sg[2],igenes] <- logX[sg[1]:sg[2],igenes] - 5
-logX[(sg[2]+1):sg[3],igenes] <- logX[(sg[2]+1):sg[3],igenes] + 10
+# library(bootfs)
+set.seed(1234)
+data <- simDataSet(nsam=30, ngen=100, sigma=2, plot=TRUE)
+logX <- data$logX
+groupings <- data$groupings
 
 ## run the bootstrapping
 retBS <- doBS(logX, groupings, 
@@ -72,7 +67,7 @@ retBS <- doBS(logX, groupings,
 	maxRuns=30)
 
 ## summarize a single bootstrapping run into an importance graph
-bsres <- makeIG(retBS[[1]], SUBDIR=NULL)
+bsres <- makeIG(retBS[[1]], SUBDIR=NULL, prob=.975)
 
 ## remove the created directory
 system("rm -rf bs")

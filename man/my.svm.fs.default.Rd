@@ -74,9 +74,11 @@ Function from package \code{penalizedSVM}
 %%     ~~Describe \code{\dots} here~~
 }
 }
+\seealso{
+\link[penalizedSVM]{penalizedSVM} 
+}
 \details{
-This function is taken and modified from package \code{penalizedSVM},
-since a bug in the original package always opened plot devices
+This function is taken and modified from package \code{penalizedSVM}, written by Natalia Becker, Axel Benner, Wiebke Werft, since a bug in the original package always opened plot devices
 unintendedly.
 }
 \keyword{ internal }

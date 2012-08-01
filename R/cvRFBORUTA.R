@@ -20,7 +20,9 @@
 		X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 		names(X) <- names(groupings)
 
-		if(length(X)>1) {
+        ## use multicores if more than one group is to be classified
+        useparallel <- length(grep("package:(parallel|multicore)", search())>0)
+        if(length(X)>1 & useparallel) {
 			resRF <- mclapply(X, rfclass_cv, logX=logX, ncv=ncv, repeats=repeats, seed=seed, maxRuns=maxRuns, mc.preschedule=TRUE, mc.cores=length(X))
 		} else {
 			resRF <- lapply(X, rfclass_cv, logX=logX, ncv=ncv, repeats=repeats, seed=seed, maxRuns=maxRuns)

@@ -23,13 +23,18 @@ bsRFBORUTA <- function(logX, groupings, DIR, params=NULL) {
 	X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 	names(X) <- names(groupings)
 	
-	if(length(X)>1) {
+    ## use multicores if more than one group is to be classified
+    useparallel <- length(grep("package:(parallel|multicore)", search())>0)
+	if(length(X)>1 & useparallel) {
 		rfs_bstr <- mclapply(X, rf_multi, datX=logX, maxRuns=maxRuns, seed=seed, bstr=bstr, mc.preschedule=TRUE, mc.cores=length(X))
 	} else {
 		rfs_bstr <- lapply(X, rf_multi, datX=logX, maxRuns=maxRuns, seed=seed, bstr=bstr)
 	}
 	
-	ig <- makeIG(rfs_bstr, SUBDIR)
+    ## set an attribute naming the method used
+    attr(rfs_bstr, "fs.method") <- "rf_boruta"
+
+	ig <- makeIG(rfs_bstr, SUBDIR, prob=0.975)
 
 	if(saveres) {
 		save(rfs_bstr, ig, params, file=paste(SUBDIR, "RF_RData.RData", sep="/"))

@@ -7,7 +7,7 @@ Crossvalidation for SCAD SVM classification and feature selection.
 Main wrapper for call of SCAD SVM classification.
 }
 \usage{
-cvSCAD(logX, groupings, DIR, params = list(seed = 123, ncv = 5, repeats = 10, maxiter = 1000, maxevals = 500))
+cvSCAD(logX, groupings, DIR, params = list(seed = 123, ncv = 5, repeats = 10, maxiter = 1000, maxevals = 500, fs.method="scad"))
 }
 \arguments{
   \item{logX}{
@@ -23,7 +23,8 @@ cvSCAD(logX, groupings, DIR, params = list(seed = 123, ncv = 5, repeats = 10, ma
 }
   \item{params}{
 	A parameter list with the following elements. \code{seed}: a random seed. \code{ncv}: the number of folds in the crossvalidation. \code{repeats}: number of repeats of the CV. \code{maxiter}: SCAD parameter for maximum iterations. \code{maxeval}: SCAD parameter for maximum evaluations.
-}
+ \code{fs.method}: The method for feature selection. One out of \emph{scad, 1norm, scad+L2, DrHSVM}. See package penalizedSVM for the methods.
+ }
 }
 \details{
 	Do a \code{ncv}-fold crossvalidation (CV) with \code{repeats} repeats. Each grouping assignment from \code{groupings} will be used as classification task. If more than one grouping is present, the package uses parallelisation in the package \code{multicore}.\cr

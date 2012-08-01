@@ -46,40 +46,36 @@ Help for \code{pamr}\cr
 \examples{
 \dontrun{
 
-# library(bootFS)
-nsam <- 30 ## number of samples
-ngen <- 100 ## number of features
+# library(bootfs)
+set.seed(1234)
+data <- simDataSet(nsam=30, ngen=100, sigma=2, plot=TRUE)
+logX <- data$logX
+groupings <- data$groupings
 
-## get a noise data matrix
-logX <- matrix(rnorm(nsam*ngen, 0, 10), nrow=nsam, 
-	dimnames=list(paste("s1", 1:nsam,sep="_"), paste("g",1:ngen,sep=""))) 
-groupings <- list(grx=c(rep(-1, nsam/2), rep(1,nsam/2)))
-## now add some information so some of the genes
-igenes <- c(1:10)
-sg <- c(1,nsam/3,2*nsam/3,nsam)
-logX[sg[1]:sg[2],igenes] <- logX[sg[1]:sg[2],igenes] - 5
-logX[(sg[2]+1):sg[3],igenes] <- logX[(sg[2]+1):sg[3],igenes] + 10
+methods <- c("pamr", "scad", "rf_boruta", "1norm", "scad+L2", "DrHSVM")
 
 ## run the crossvalidation
-retCV <- doCV(logX, groupings, fs.methods = c("pamr", "scad", "rf_boruta"), 
-	DIR = "cv", seed = 123, ncv = 5, repeats = 2, 
+retCV <- doCV(logX, groupings, fs.methods = methods, 
+	DIR = "cv", seed = 123, ncv = 5, repeats = 5, 
 	jitter=FALSE, maxiter = 100, maxevals = 50, 
 	max_allowed_feat = 50, n.threshold = 50, maxRuns = 30)
-		
-## run the bootstrapping
+
+## run the bootstrapping, use only first three methods
 retBS <- doBS(logX, groupings, 
-	fs.methods=c("pamr","scad","rf_boruta"),
+	fs.methods=methods,
 	DIR="bs", 
-	seed=123, bstr=5, saveres=FALSE, jitter=FALSE,
+	seed=123, bstr=10, saveres=FALSE, jitter=FALSE,
 	maxiter=100, maxevals=50, bounds=NULL,
 	max_allowed_feat=NULL, n.threshold=50,
 	maxRuns=30)
 
-## create the importance graph for all methods
+#retBS <- doBS(logX, groupings, fs.methods=methods[4], DIR="bs", seed=123, bstr=2, saveres=FALSE, jitter=FALSE,	maxiter=20, maxevals=20, bounds=NULL,max_allowed_feat=NULL, n.threshold=25,maxRuns=10)
+
+## create the importance graph using the first 3 FS-methods
 ## and export the adjacency matrix containing the 
 ## numbers of occuerrences of the features, as well 
 ## as the top hits.
-res <- resultBS(retBS, DIR="bs", vlabel.cex = 3, filter = 0, saveres = FALSE)
+res <- resultBS(retBS, DIR="bs", vlabel.cex = 3, filter = 0, saveres = FALSE, useresults=1:3)
 
 ## plot the importance graph
 ig <- importance_igraph(res$adj, main = "my test", 

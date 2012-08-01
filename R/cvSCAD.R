@@ -1,6 +1,7 @@
-	cvSCAD <- function(logX, groupings, DIR, params=list(seed=123, ncv=5, repeats=10,maxiter=1000, maxevals=500)) {
+	cvSCAD <- function(logX, groupings, DIR, params=list(seed=123, ncv=5, repeats=10,maxiter=1000, maxevals=500, fs.method="scad")) {
 		# output directory
-		fs.method <- "scad"
+		#fs.method <- "scad"
+		fs.method <- params$fs.method
 		seed <- params$seed
 		ncv <- params$ncv
 		repeats <- params$repeats
@@ -16,12 +17,15 @@
 		SUBDIR <- paste(DIR,fs.method,sep="/")
 		if(!file.exists(SUBDIR))
 			dir.create(SUBDIR)
-		# grouping information
+		
+        ## grouping information
 		fnames <- paste(SUBDIR, "/", names(groupings), ".pdf", sep="")
 		X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 		names(X) <- names(groupings)
 
-		if(length(X)>1) {
+        ## use multicores if more than one group is to be classified
+        useparallel <- length(grep("package:(parallel|multicore)", search())>0)
+		if(length(X)>1 & useparallel) {
 			resSCAD <- mclapply(X, pclass, logX=logX, ncv=ncv, repeats=repeats, maxiter=maxiter, maxevals=maxevals, fs.method=fs.method, seed=seed, mc.preschedule=TRUE, mc.cores=length(X))
 		} else {
 			resSCAD <- lapply(X, pclass, logX=logX, ncv=ncv, repeats=repeats, maxiter=maxiter, maxevals=maxevals, fs.method=fs.method, seed=seed)

@@ -21,7 +21,9 @@
 		X <- lapply(1:length(groupings), function(i,groupings,fnames) list(groupings[[i]], fnames[i]), groupings=groupings, fnames=fnames)
 		names(X) <- names(groupings)
 
-		if(length(X)>1) {
+        ## use multicores if more than one group is to be classified
+        useparallel <- length(grep("package:(parallel|multicore)", search())>0)
+        if(length(X)>1 & useparallel) {
 			resPAM <- mclapply(X, pamclass, logX=logX, nfold=ncv, n.threshold=n.threshold, seed=seed, max_allowed_feat=max_allowed_feat, mc.preschedule=TRUE, mc.cores=length(X))
 		} else {
 			resPAM <- lapply(X, pamclass, logX=logX, nfold=ncv, n.threshold=n.threshold, seed=seed, max_allowed_feat=max_allowed_feat)

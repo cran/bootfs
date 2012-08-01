@@ -27,6 +27,8 @@ bsPAMR <- function(logX, groupings, DIR, params=NULL) {
 	seedo <- seed # start seed value
 
 	## do the pamr classification for all strata
+    ## is rather quick, so parallel execution is not a major speed gain
+    ## TODO: add parallel option
 	pam_bstr <- list()
 	for(i in 1:length(X)) {
 		datX <- logX
@@ -64,7 +66,10 @@ bsPAMR <- function(logX, groupings, DIR, params=NULL) {
 		pam_bstr[[names(X)[i]]] <- pams
 	}
 
-	ig <- makeIG(pam_bstr, SUBDIR)
+    ## set an attribute naming the method used
+    attr(pam_bstr, "fs.method") <- "pamr"
+
+	ig <- makeIG(pam_bstr, SUBDIR, prob=0.975)
 
 	if(saveres) {
 		save(pam_bstr, ig, params, file=paste(SUBDIR, "PAM_RData.RData", sep="/"))

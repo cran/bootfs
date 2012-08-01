@@ -91,27 +91,20 @@ R-packages: \code{penalizedSVM}, \code{Boruta}, \code{pamr}
 \dontrun{
 
 # library(bootFS)
-nsam <- 30 ## number of samples
-ngen <- 100 ## number of features
-
-## get a noise data matrix
-logX <- matrix(rnorm(nsam*ngen, 0, 10), nrow=nsam, 
-	dimnames=list(paste("s1", 1:nsam,sep="_"), paste("g",1:ngen,sep=""))) 
-groupings <- list(grx=c(rep(-1, nsam/2), rep(1,nsam/2)))
-## now add some information so some of the genes
-igenes <- c(1:10)
-sg <- c(1,nsam/3,2*nsam/3,nsam)
-logX[sg[1]:sg[2],igenes] <- logX[sg[1]:sg[2],igenes] - 5
-logX[(sg[2]+1):sg[3],igenes] <- logX[(sg[2]+1):sg[3],igenes] + 10
+set.seed(1234)
+data <- simDataSet(nsam=30, ngen=100, sigma=2, plot=TRUE)
+logX <- data$logX
+groupings <- data$groupings
 
 ## run the bootstrapping
 retBS <- doBS(logX, groupings, 
 	fs.methods=c("pamr","scad","rf_boruta"),
 	DIR="bs", 
-	seed=123, bstr=5, saveres=FALSE, jitter=FALSE,
+	seed=123, bstr=15, saveres=FALSE, jitter=FALSE,
 	maxiter=100, maxevals=50, bounds=NULL,
 	max_allowed_feat=NULL, n.threshold=50,
 	maxRuns=30)
+retBS <- doBS(logX, groupings, fs.methods=c("pamr","scad","rf_boruta"),	DIR="bs", seed=123, bstr=15, saveres=FALSE, jitter=FALSE, maxiter=100, maxevals=50, bounds=NULL, max_allowed_feat=NULL, n.threshold=50,	maxRuns=30)
 
 bsres <- makeIG(retBS[[1]], SUBDIR=NULL)
 
