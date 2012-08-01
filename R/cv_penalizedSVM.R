@@ -41,10 +41,11 @@ function(X, Y, ncv=5, repeats=10, filename=NULL,
 		for(ri in 1:repeats) {
 			## find a permutation leaving stratified test/training sets
 			## with regard to the class label distributions
-			folds <- select_cv_balanced(X, Y, ncv)
+			#folds <- select_cv_balanced(X, Y, ncv)
+			folds <- select_cv_balanced(Y, ncv)
 			for(i in 1:ncv) {
 				it <- it + 1
-				sel <- folds[[1]]
+				sel <- folds[[i]]
 				seltrain <- setdiff(1:nrow(X), sel)
 				test <- X[sel,]
 				testg <- Y[sel]

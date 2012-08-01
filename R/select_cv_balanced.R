@@ -1,4 +1,6 @@
-select_cv_balanced <- function(x, yp, ncv) {
+## yp: class labels
+## ncv: number of folds
+select_cv_balanced <- function(yp, ncv) {
 		clz <- which(yp==-1)
 		clo <- which(yp==1)
 		nz <- floor(length(clz)/ncv)

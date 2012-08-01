@@ -25,10 +25,11 @@ function(X, logX, ncv=5, repeats=10, seed=123,
 		for(ri in 1:repeats) {
 			## find a permutation leaving stratified test/training sets
 			## with regard to the class label distributions
-			folds <- select_cv_balanced(x, yp, ncv)
+			#folds <- select_cv_balanced(x, yp, ncv)
+			folds <- select_cv_balanced(yp, ncv)
 			for(i in 1:ncv) {
 				it <- it + 1
-				sel <- folds[[1]]
+				sel <- folds[[i]]
 				seltrain <- setdiff(1:nrow(x), sel)
 				#############
 				## Workaround for very small sample sets, only

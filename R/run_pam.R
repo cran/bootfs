@@ -1,14 +1,19 @@
 run_pam <- function(pamdat, nfold=5, n.threshold=30, seed=NULL) {
 		#stopifnot(require(pamr))
-		if(is.null(seed))
-			seed <- as.numeric(strsplit(as.character(Sys.time()), ":")[[1]][3])
-		set.seed(seed)
+		#if(is.null(seed))
+		#	seed <- as.numeric(strsplit(as.character(Sys.time()), ":")[[1]][3])
+		#set.seed(seed)
 		max_allowed_feat <- pamdat$max_allowed_feat
+		
 		#pamdat <- pamdat[-3] ## remove the max_allowed_feat stuff
 		histtr <- pamr.train(pamdat, n.threshold=n.threshold)
-		histcv <- pamr.cv(histtr, pamdat, nfold=nfold)
+		## define the folds variable
+		folds <- select_cv_balanced(pamdat$y, nfold)
+		histcv <- pamr.cv(histtr, pamdat, folds=folds)
+		#histcv <- pamr.cv(histtr, pamdat, nfold=nfold)
 		ts <- histcv$threshold
 		te <- histcv$error
+
 		if(!is.null(max_allowed_feat)) {
 			raus <- which(histcv$size>max_allowed_feat)
 			if(length(raus>0)) {

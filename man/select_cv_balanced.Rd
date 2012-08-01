@@ -8,12 +8,9 @@ Balanced training/test set selection for crossvalidation.
 Balanced training/test set selection for crossvalidation.
 }
 \usage{
-select_cv_balanced(x, yp, ncv)
+select_cv_balanced(yp, ncv)
 }
 \arguments{
-  \item{x}{
-    The data.
-}
   \item{yp}{
     The grouping.
 }

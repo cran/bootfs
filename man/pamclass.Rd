@@ -8,7 +8,7 @@ Wrapper for PAMR classification call.
 Wrapper for PAMR classification call.
 }
 \usage{
-pamclass(X, logX, nfold = 5, n.threshold = 30, seed = NULL, max_allowed_feat = NULL)
+pamclass(X, logX, nfold = 5, n.threshold = 30, seed = NULL, max_allowed_feat = NULL, repeats = 1)
 }
 \arguments{
   \item{X}{
@@ -29,6 +29,10 @@ pamclass(X, logX, nfold = 5, n.threshold = 30, seed = NULL, max_allowed_feat = N
   \item{max_allowed_feat}{
 %%     ~~Describe \code{max_allowed_feat} here~~
 }
+  \item{repeats}{
+%%     ~~Describe \code{repeats} here~~
+}
+
 }
 \details{
 An internal function, which is usually not called directly.
