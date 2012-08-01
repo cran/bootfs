@@ -29,7 +29,8 @@ bsGBM(logX, groupings, DIR=NULL, params = NULL)
 	Wrapper function for GBM bootstrapping call.
 }
 \value{
-	List holding the bootstrap results for each grouping variable in \code{grouping}.
+	List holding the bootstrap results for each grouping variable in \code{grouping}.\cr
+	This is a list with one element for each of the \code{bstr} bootstrap iterations. Each element is again a list, which is retrieved by function \code{\link{gbm_multi}}.
 }
 
 \author{

@@ -47,19 +47,20 @@ doBS <- function(logX, groupings, ## data and grouping
 
 	results <- list()
 	for(i in 1:length(fs.methods)) {
-		params[["fs.method"]] <- fs.methods[i]
+		method <- fs.methods[i]
+		params[["fs.method"]] <- method
 		if(fs.methods[i]=="pamr") {
-			results[["pamr"]] <- bsPAMR(logX, groupings, DIR, params)
+			results[[method]] <- bsPAMR(logX, groupings, DIR, params)
 		} else if(fs.methods[i]=="rf_boruta") {
             #params[["fs.method"]] <- fs.methods[i]
-			results[["rf_boruta"]] <- bsRFBORUTA(logX, groupings, DIR, params)
+			results[[method]] <- bsRFBORUTA(logX, groupings, DIR, params)
 		} else if(fs.methods[i]=="rf") {
             #params[["fs.method"]] <- fs.methods[i]
-			results[["rf"]] <- bsRFBORUTA(logX, groupings, DIR, params)
+			results[[method]] <- bsRFBORUTA(logX, groupings, DIR, params)
 		} else if(fs.methods[i]=="gbm") {
-			results[["gbm"]] <- bsGBM(logX, groupings, DIR, params)	
+			results[[method]] <- bsGBM(logX, groupings, DIR, params)	
 		} else { 
-			results[[fs.methods[i]]] <- bsSCAD(logX, groupings, DIR, params)
+			results[[method]] <- bsSCAD(logX, groupings, DIR, params)
 		} 
 	}
 

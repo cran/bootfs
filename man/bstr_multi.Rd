@@ -42,7 +42,7 @@ bstr_multi(X, datX, bstr, seed = 123, fs.method = "scad", bounds,
 An internal function, which is usually not called directly.
 }
 \value{
-Todo.
+Alist with one element for each of the \code{bstr} bootstrap iterations. Each element contains the result of the \code{svm.fs} call.
 }
 \references{
 Todo.

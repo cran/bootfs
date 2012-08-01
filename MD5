@@ -1,4 +1,4 @@
-fce14150326bc925ef67f1f4301ba4d9 *DESCRIPTION
+306bfc021efb7f5cf269ffe06792c192 *DESCRIPTION
 0340c63a19f982f365e36ef69e602600 *NAMESPACE
 39e0ca2d21a1dbaf6da92ec8623e8f41 *R/align_feat_boruta.R
 02eb67e7af7c65bb9b63521233ea3193 *R/align_features.R
@@ -15,11 +15,11 @@ aa68605635acf56810725a2841487279 *R/cvRFBORUTA.R
 bd206e51bb0b87b74637f37fe25b533e *R/cvSCAD.R
 f035fb68c26284d83d85b8412e9c4e70 *R/cv_gbmclass.R
 45c124ea415d86e18c715e64a85e510a *R/cv_pamclass.R
-4b960a0db3fceef3db5c52ee1fed31ca *R/cv_penalizedSVM.R
+db61f4eb95a7724ea09d4ab50197a877 *R/cv_penalizedSVM.R
 0b9bf8aca92503242702fbf81a8f0376 *R/cv_rfclass.R
 a45648992a14f9dcdf3a8763a658dbff *R/dist.eucsq.R
-c6a611783f1dfbb4464613de5b43ee6f *R/doBS.R
-60befcc261df3b89504d50c39e9ced61 *R/doCV.R
+07949ff4c09c4e756f1eaa211c73dd9f *R/doBS.R
+e5e13abe9110754436c0048ccd648b7a *R/doCV.R
 c1f7a57dadf86f5c6a97a460419be262 *R/drawheat.R
 50aa9f06ecf2a6fe5dca9c3ca7c944e2 *R/extract_feat_boruta.R
 af907d56ccf4dcb86b0e59b2cff534d5 *R/extract_feat_pam.R
@@ -41,6 +41,7 @@ e820df7052b60d37cbd1ac6fac0b2eb7 *R/select_bootstrap_data.R
 493a90a23dc87cc9436cff0b79ff9770 *R/select_threshold.R
 152863eed1d750cf657367263c050e83 *R/simDataSet.R
 c5d757b2e85fd090f11d44e490aeeb70 *R/ward.R
+f3fe4f9f572e867142c005016ad4dea8 *build/vignette.rds
 4040aa4e02c3fc5f999a014376ad1ff0 *inst/doc/bootfs.R
 72e2f3d550b691b7f2cb1c8b3906a41c *inst/doc/bootfs.Rnw
 00911c2e6561af157eaf8b3883e6621d *inst/doc/bootfs.pdf
@@ -48,11 +49,11 @@ c5d757b2e85fd090f11d44e490aeeb70 *R/ward.R
 939f7155de47eac68702507954e645f3 *man/align_features.Rd
 334e3093fd55ca73ce23f9ac65e5cacc *man/bootfs-package.Rd
 7dfc91dd783abafbf126d32bebf32cf4 *man/bootstrap_roc.Rd
-b96db436ac228b9fce83a2de003f3266 *man/bsGBM.Rd
-7efd5653ef37c0e9c642c7c3f3687750 *man/bsPAMR.Rd
-66d98645dd4bd9644c26fafc89d8415a *man/bsRFBORUTA.Rd
-d73e69495aeccc0ac9789d70dd4d3c1a *man/bsSCAD.Rd
-176aaf95a88e8b3efe56782a6df584a4 *man/bstr_multi.Rd
+6d9ac90309aec2d1c6f06c0acd04a98f *man/bsGBM.Rd
+f5ff5ff93282627e6d57f678c6a8bba9 *man/bsPAMR.Rd
+c93746083c58ed1988bc2baf0d61c7c8 *man/bsRFBORUTA.Rd
+0d2e7134d8864625b59672eb9816d37c *man/bsSCAD.Rd
+1b404924e3a2cfc356d8b37f04ffc1c6 *man/bstr_multi.Rd
 db51734324cd8ff2379684bddb56613a *man/control_params.Rd
 91768f3292777003e937f5a9eef83d85 *man/cvGBM.Rd
 ab9f5300035992b356273813de4d4375 *man/cvPAMR.Rd
@@ -63,8 +64,8 @@ bda4200c7d76db4863e8510ee1611440 *man/cv_gbmclass.Rd
 f8c0073659bbc576de7462e2153e6530 *man/cv_penalizedSVM.Rd
 9717f41b9411276584114949203eea9b *man/cv_rfclass.Rd
 b05e6beb33b95ab7ff3c54f60b96f534 *man/dist.eucsq.Rd
-e9d00eecd0a73bf8ff708a68a848f2db *man/doBS.Rd
-5d40232be0d9b0bd737d1acdc96dd0a5 *man/doCV.Rd
+6d63897e21f92731f1681bf4a327e9bd *man/doBS.Rd
+dc5b85c6d929f8ef9c10421ae2a536a9 *man/doCV.Rd
 69defab8fc9bd6c2cb7863dfa96f27d9 *man/drawheat.Rd
 b4020c2b7a3ef7b226762bb26b4088b2 *man/extract_feat_boruta.Rd
 df0c68979b050fca33d7a4a8797ff1f2 *man/extract_feat_pam.Rd
@@ -82,7 +83,7 @@ c3b76f53e272a27ac9314074fc5d19a6 *man/layout.ellipsis.Rd
 58017f8d8fceb7a285363788412f71a3 *man/makeIG.Rd
 3a88fca3b38c57df73a84092fc5be344 *man/resultBS.Rd
 72f26d91e7a4fb9c07870de2890d2619 *man/resultCV.Rd
-a8c8054bf6f00e3213cc37832ca7b3d6 *man/rf_multi.Rd
+516da64f8b9da7dbe3928f423d7ce498 *man/rf_multi.Rd
 7f405276f48878c182ecd0f0b8f40b90 *man/roc.Rd
 a90295b7ff169e32216f041f766b9c18 *man/run_pam.Rd
 edf8b6a3619e9f09ff96178858451427 *man/select_bootstrap_data.Rd
@@ -92,7 +93,7 @@ be5fc47eb636189f8dc7163a14367efb *man/select_cv_balanced.Rd
 03d79f3470c9ea897d962399ab3d5a01 *man/svmclass.Rd
 a745b5982a4313d5f97c52b9ff4e4aab *man/ward.Rd
 72e2f3d550b691b7f2cb1c8b3906a41c *vignettes/bootfs.Rnw
-53268541faf4cc076bd4d28e18489a79 *vignettes/bootfs.tex
+03c537affc37aab071119e0039397494 *vignettes/bootfs.tex
 5fcd7542ddc1ba5e750af79114391b7f *vignettes/impgraph1.pdf
 9a10885eefbffb0ad70e38f94e115684 *vignettes/impgraph2.pdf
 1a966430fc4cebbb058531f0fb3981a2 *vignettes/references.bib

@@ -36,7 +36,14 @@ bsPAMR(logX, groupings, DIR=NULL, params = NULL)
 Usually called from \code{\link{doBS}}.
 }
 \value{
-The result list of the bootstrapping.
+The result list of the bootstrapping, which is a list: For each classification instance in \code{groupings}, one element is saved, each a list with \code{bstr} elements, from which each again is a list holding the following elements:\cr
+\item{histtr}{training object generated with pamr.train.}
+\item{histcv}{cv object generated with pamr.cv}
+\item{tmin}{Minimal threshold value for the feature selection.}
+\item{selected}{Indices of selected features at \code{tmin}.}
+\item{selected_names}{Names of selected features at \code{tmin}.}
+
+To get to one bootstrapping element, one could use for example: \code{returnobject[[1]][[1]][["tmin"]]} to get access to the minimal threshold of the first bootstrapping iteration in the first classification problem.
 }
 \author{
 Christian Bender (christian.bender@tron-mainz.de)

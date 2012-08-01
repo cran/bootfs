@@ -45,7 +45,7 @@ rf_multi(X, datX, maxRuns = 500, seed = 123, bstr = 100,
 An internal function, which is usually not called directly.
 }
 \value{
-Todo.
+List with two elements: \code{bres} holding the bootstrap fits and \code{selprobes} holding the selected features for each bootstrapping run.
 }
 \references{
 Todo.

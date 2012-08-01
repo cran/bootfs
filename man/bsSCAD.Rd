@@ -38,7 +38,9 @@ bsSCAD(logX, groupings, DIR=NULL, params = NULL)
 Usually called from \code{\link{doBS}}.
 }
 \value{
-The result list of the bootstrapping.
+List holding the bootstrap results for each grouping variable in \code{groupings}.\cr
+This is a list with one element for each of the \code{bstr} bootstrap iterations. Each element is again a list, which is retrieved by function \code{\link{bstr_multi}}.
+
 }
 \author{
 Christian Bender (christian.bender@tron-mainz.de)

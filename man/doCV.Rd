@@ -81,7 +81,7 @@ doCV(logX, groupings, fs.methods = c("pamr","gbm","rf"),
 	
 }
 \value{
-	Output is stored in directory \code{DIR}.
+ A list containing the crossvalidation results. Contains one element for each feature selection method. These elements correspond to the return values of the functions \code{\link{cvPAMR}}, \code{\link{cvRFBORUTA}}, \code{\link{cvGBM}} and \code{\link{cvSCAD}}, depending on the setting of \code{fs.method}. If \code{DIR} is set, output is also saved in directory \code{DIR}.
 }
 \references{
 Boser, B.E., Guyon, I.M., Vapnik, V.N.:  A Training Algorithm for Optimal Margin Classifiers. Proceedings of the 5th Annual ACM Workshop on Computational Learning Theory, 1992.
@@ -101,13 +101,18 @@ Friedman, J. H.: Greedy function approximation: A gradient boosting machine. Ann
 \author{
 Christian Bender
 }
+
+\seealso{
+R-packages: \code{penalizedSVM}, \code{Boruta}, \code{pamr}, \code{gbm}, \code{randomForest}
+\code{\link{cvPAMR}}
+\code{\link{cvRFBORUTA}}
+\code{\link{cvGBM}}
+\code{\link{cvSCAD}}
+}
 \note{
 Todo.
 }
 
-\seealso{
-R-packages: \code{penalizedSVM}, \code{Boruta}, \code{pamr}, \code{gbm}, \code{randomForest}
-}
 \examples{
 \dontrun{
 

@@ -60,20 +60,22 @@ doCV <- function(logX, groupings, ## data and grouping
 	## run the CVs
 	results <- list()
 	for(i in 1:length(fs.methods)) {
-		params[["fs.method"]] <- fs.methods[i]
-		if(fs.methods[i]=="pamr") {
-			results[["pamr"]] <- cvPAMR(logX, groupings, DIR, params)
-		} else if(fs.methods[i]=="rf_boruta") {
-			results[["rf_boruta"]] <- cvRFBORUTA(logX, groupings, DIR, params)
-		} else if(fs.methods[i]=="rf") {
-			results[["rf"]] <- cvRFBORUTA(logX, groupings, DIR, params)
-		} else if(fs.methods[i]=="gbm") {
-			results[["gbm"]] <- cvGBM(logX, groupings, DIR, params)
+		method <- fs.methods[i]
+		params[["fs.method"]] <- method
+		if(method=="pamr") {
+			results[[method]] <- cvPAMR(logX, groupings, DIR, params)
+		} else if(method=="rf_boruta") {
+			results[[method]] <- cvRFBORUTA(logX, groupings, DIR, params)
+		} else if(method=="rf") {
+			results[[method]] <- cvRFBORUTA(logX, groupings, DIR, params)
+		} else if(method=="gbm") {
+			results[[method]] <- cvGBM(logX, groupings, DIR, params)
 		} else {
 			## any out of scad, scad+L2, DrHSVM or 1norm
 			## TODO change the name of the results object to the actual method
 			## can also be 1norm, DrHSVM etc.
-			results[["scad"]] <- cvSCAD(logX, groupings, DIR, params)
+			#results[["scad"]] <- cvSCAD(logX, groupings, DIR, params)
+			results[[method]] <- cvSCAD(logX, groupings, DIR, params)
 		}
 	}
 	results

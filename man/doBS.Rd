@@ -87,7 +87,7 @@ doBS(logX, groupings,
 	It is easiest to generate the control parameter list by using \code{\link{control_params}}.
 }
 \value{
-	Output is stored in directory \code{DIR}.
+ A list containing the bootstrapping results. Contains one element for each feature selection method. These elements correspond to the return values of the functions \code{\link{bsPAMR}}, \code{\link{bsRFBORUTA}}, \code{\link{bsGBM}} and \code{\link{bsSCAD}}, depending on the setting of \code{fs.method}. If \code{DIR} is set, output is also saved in directory \code{DIR}.
 }
 \references{
 Boser, B.E., Guyon, I.M., Vapnik, V.N.:  A Training Algorithm for Optimal Margin Classifiers. Proceedings of the 5th Annual ACM Workshop on Computational Learning Theory, 1992.
@@ -113,6 +113,10 @@ Todo.
 
 \seealso{
 R-packages: \code{penalizedSVM}, \code{Boruta}, \code{pamr}
+\code{\link{bsPAMR}}
+\code{\link{bsRFBORUTA}}
+\code{\link{bsGBM}}
+\code{\link{bsSCAD}}
 }
 \examples{
 \dontrun{
